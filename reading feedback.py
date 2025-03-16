@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # --- Configuration ---
 OLD_FOLDER = "old_with_feedback"  # Contains combined submission+feedback docs
 NEW_FOLDER = "new_to_generate"    # Raw student submissions without feedback
-OUTPUT_FOLDER = "mirrored_output" # Outputs submissions WITH embedded feedback
+OUTPUT_FOLDER = "generated_output" # Outputs submissions WITH embedded feedback
 
 # --- Helper Functions ---
 def add_feedback_to_doc(original_path, feedback, output_path):
@@ -76,7 +76,7 @@ def main():
                 success = add_feedback_to_doc(student_path, feedback, output_path)
                 
                 if success:
-                    print(f"Created mirrored document: {output_path}")
+                    print(f"Created generated document: {output_path}")
                 else:
                     print(f"Failed to process: {filename}")
 
