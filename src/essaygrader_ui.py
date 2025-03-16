@@ -317,7 +317,11 @@ with gr.Blocks(css=css_styling) as demo:
     )
     inline_button.click(
         show_inline_feedback,
+<<<<<<< Updated upstream
         inputs=[],
+=======
+        inputs=[question_textbox, requirements_input, student_id_textbox, assignment_id_textbox],
+>>>>>>> Stashed changes
         outputs=[question_textbox, requirements_input, student_id_textbox, assignment_id_textbox, feedback_textbox, inline_textbox1, inline_textbox2, inline_textbox3, inline_button]
         )
 
