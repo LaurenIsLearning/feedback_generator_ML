@@ -1,0 +1,4 @@
+gradio
+langchain_openai
+gradio_client
+openai
