@@ -10,10 +10,10 @@ import shared
 from shared import OutputFields
 from shared import InputFields
 
-# from google.colab import userdata
+from google.colab import userdata
 
 # Obtain chatbot API
-openai.api_key =   # userdata.get("ChatGPT")
+openai.api_key = userdata.get("ChatGPT")
 TEMPERATURE = 0.7
 OPEN_AI_MODEL = "gpt-4o"
 
@@ -95,7 +95,8 @@ def generate_inline_feedback(input: InputFields):
     Instructions:
     You are an expert writing tutor providing constructive inline feedback on a student's essay.
     - Analyze the student's assignment while considering the provided **requirements**.
-    - Provide **3-5 inline feedback points** in JSON format, ensuring feedback aligns with grading expectations.
+    - Provide **3 inline feedback points** in JSON format, ensuring feedback aligns with grading expectations.
+    - EVEN IF YOU ONLY HAVE ONE, MAKE 3
     - STRICTLY RETURN ONLY JSON OUTPUT
 
     ### Requirements Summary:
@@ -139,27 +140,20 @@ def generate_inline_feedback(input: InputFields):
     # Attempt to parse response as JSON
     try:
         feedback_list = json.loads(response_text)
-        formatted_feedback = "\n".join(
-            [
-                f"• Excerpt: \"{item['excerpt']}\"\n"
-                f"• Feedback: {item['feedback']}\n"
-                f"• Category: {item['category']}\n"
-                "-------------------------------------"
-                for item in feedback_list
-            ]
-        )
+        formatted_feedback = [
+            OutputFields()
+            .add_student_id(input.get_student_id())
+            .add_assignment_id(input.get_assignment_id())
+            .add_text_snippet(item["excerpt"])
+            .add_feedback(item["feedback"])
+            .add_feedback_type(item["category"])
+            for item in feedback_list
+        ]
     except (json.JSONDecodeError, TypeError, KeyError) as e:
         print(f"Error parsing json: ${e}")
         formatted_feedback = "--Error parsing JSON."
 
-    return (
-        OutputFields()
-        .add_student_id(input.get_student_id())
-        .add_assignment_id(input.get_assignment_id())
-        .add_text_snippet(input.get_student_essay())
-        .add_feedback(formatted_feedback)
-        .add_feedback_type("Constructive")
-    )
+    return formatted_feedback
 
 
 """# Generate Summary Feedback"""
@@ -222,5 +216,5 @@ def generate_summary_feedback(input: shared.InputFields):
         .add_assignment_id(input.get_assignment_id())
         .add_text_snippet(input.get_student_essay())
         .add_feedback(summary_feedback)
-        .add_feedback_type("Constructive")
+        .add_feedback_type("Summary")
     )

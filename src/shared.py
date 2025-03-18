@@ -136,6 +136,9 @@ class OutputFields:
         self._feedback_type = value
         return self
 
+    def __str__(self):
+        return f"""Text:\n{self.get_text_snippet()}\n\nFeedback Type:\n{self.get_feedback_type()}\n\nFeedback:\n{self.get_feedback()}"""
+
     # JSON parsing and serialization
     @staticmethod
     def from_json(json_str):
