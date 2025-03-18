@@ -63,7 +63,6 @@ def reset_interface():
         gr.update(value="", visible=False),  # inline feedback 2
         gr.update(value="", visible=False),  # inline feedback 3
         gr.update(visible=False),
-    )
 
 
 def submit_button_updates(essay, requirements, student_id, assignment_id):
