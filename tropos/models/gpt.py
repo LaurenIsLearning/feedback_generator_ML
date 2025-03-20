@@ -6,14 +6,12 @@ import gradio as gr
 import json
 import os
 import re
-import shared
-from shared import OutputFields
-from shared import InputFields
+from ..io_fields import OutputFields, InputFields
 
-from google.colab import userdata
+# from google.colab import userdata
 
 # Obtain chatbot API
-openai.api_key = userdata.get("ChatGPT")
+# openai.api_key = userdata.get("ChatGPT")
 TEMPERATURE = 0.7
 OPEN_AI_MODEL = "gpt-4o"
 
@@ -33,7 +31,10 @@ def load_cache():
         with open(REQUIREMENTS_CACHE_FILE, "r") as file:
             return json.load(file)
     return {}
-# 
+
+
+#
+
 
 def save_cache(cache):
     """Save the requirements cache to a file"""
@@ -160,7 +161,7 @@ def generate_inline_feedback(input: InputFields):
 """# Generate Summary Feedback"""
 
 
-def generate_summary_feedback(input: shared.InputFields):
+def generate_summary_feedback(input: InputFields):
     """
     Generates high-level summary feedback on the entire essay, considering assignment requirements.
     Returns structured feedback on strengths, weaknesses, next steps, and rubric alignment.

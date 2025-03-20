@@ -2,8 +2,8 @@ from spire.doc import *
 from spire.doc.common import *
 
 # NOTE: The dot notates its within the current directory
-from essaygrader_ui import make_ui
-from docx import StudentSubmission
+from tropos.ui import make_ui
+from tropos.docx import StudentSubmission
 
 
 # Starts the program

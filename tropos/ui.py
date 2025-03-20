@@ -1,15 +1,7 @@
-
-
-# #install gradio
-# !pip install gradio
-# !pip install langchain_openai
-# !pip install gradio_client
-# !pip install openai
-#
 from typing import List
-import tropos
+import tropos.models.gpt
 import gradio as gr
-import shared
+import tropos.io_fields
 
 
 # Custom CSS for styling
@@ -65,6 +57,7 @@ def reset_interface():
         gr.update(visible=False),
     )
 
+
 def submit_button_updates(essay, requirements, student_id, assignment_id):
     input_data = (
         shared.InputFields()
@@ -81,7 +74,9 @@ def submit_button_updates(essay, requirements, student_id, assignment_id):
         gr.update(visible=False),  # rubric/requirements
         gr.update(visible=False),  # student ID
         gr.update(visible=False),  # assignment ID
-        gr.update(value=output_data.__str__().replace("**",""), visible=True, lines=10),  # feedback
+        gr.update(
+            value=output_data.__str__().replace("**", ""), visible=True, lines=10
+        ),  # feedback
         gr.update(visible=False),  # inline feedback 1
         gr.update(visible=False),  # inline feedback 2
         gr.update(visible=False),  # inline feedback 3
