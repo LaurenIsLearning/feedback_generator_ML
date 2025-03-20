@@ -2,7 +2,7 @@ from spire.doc import *
 from spire.doc.common import *
 
 
-class Requirments:
+class Requirements:
 
     # Put the fields for this class here
 
@@ -12,5 +12,5 @@ class Requirments:
     # Define getters and setters, make the setters return self
 
 
-def parse_requirements(requirments: Document) -> Requirments:
+def parse_requirements(requirements: Document) -> Requirements:
     pass

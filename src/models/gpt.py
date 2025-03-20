@@ -10,10 +10,10 @@ import shared
 from shared import OutputFields
 from shared import InputFields
 
-# from google.colab import userdata
+from google.colab import userdata
 
 # Obtain chatbot API
-# openai.api_key = userdata.get("ChatGPT")
+openai.api_key = userdata.get("ChatGPT")
 TEMPERATURE = 0.7
 OPEN_AI_MODEL = "gpt-4o"
 
@@ -33,7 +33,7 @@ def load_cache():
         with open(REQUIREMENTS_CACHE_FILE, "r") as file:
             return json.load(file)
     return {}
-
+# 
 
 def save_cache(cache):
     """Save the requirements cache to a file"""

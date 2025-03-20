@@ -36,3 +36,4 @@ class StudentSubmission:
         self.requirements = requirements
 
     # TODO: Make getters and setters
+    #
