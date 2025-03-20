@@ -6,12 +6,17 @@ import gradio as gr
 import json
 import os
 import re
-from ..io_fields import OutputFields, InputFields
+from tropos.io_fields import OutputFields, InputFields
 
-# from google.colab import userdata
+ON_GOOGLE_COLAB = False
 
-# Obtain chatbot API
-# openai.api_key = userdata.get("ChatGPT")
+if ON_GOOGLE_COLAB:
+    from google.colab import userdata
+
+    # Obtain chatbot API
+    openai.api_key = userdata.get("ChatGPT")
+
+
 TEMPERATURE = 0.7
 OPEN_AI_MODEL = "gpt-4o"
 
@@ -31,9 +36,6 @@ def load_cache():
         with open(REQUIREMENTS_CACHE_FILE, "r") as file:
             return json.load(file)
     return {}
-
-
-#
 
 
 def save_cache(cache):

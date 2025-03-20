@@ -1,8 +1,7 @@
 from typing import List
-import tropos.models.gpt
+from tropos.models.gpt import generate_inline_feedback, generate_summary_feedback
 import gradio as gr
-import tropos.io_fields
-
+from tropos.io_fields import InputFields, OutputFields
 
 # Custom CSS for styling
 css_styling = """
@@ -60,14 +59,14 @@ def reset_interface():
 
 def submit_button_updates(essay, requirements, student_id, assignment_id):
     input_data = (
-        shared.InputFields()
+        InputFields()
         .add_student_id(student_id)
         .add_assignment_id(assignment_id)
         .add_requirements_input(requirements)
         .add_student_essay(essay)
     )
 
-    output_data = tropos.generate_summary_feedback(input_data)  # feedback
+    output_data = generate_summary_feedback(input_data)  # feedback
 
     return (
         gr.update(visible=False),  # essay input
@@ -86,16 +85,14 @@ def submit_button_updates(essay, requirements, student_id, assignment_id):
 
 def show_inline_feedback(essay, requirements, student_id, assignment_id):
     input_data = (
-        shared.InputFields()
+        InputFields()
         .add_student_id(student_id)
         .add_assignment_id(assignment_id)
         .add_requirements_input(requirements)
         .add_student_essay(essay)
     )
 
-    output_data: List[shared.OutputFields] = tropos.generate_inline_feedback(
-        input_data
-    )  # feedback
+    output_data: List[OutputFields] = generate_inline_feedback(input_data)  # feedback
 
     return (
         gr.update(visible=False),  # essay input
