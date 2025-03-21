@@ -1,16 +1,7 @@
-
-
-# #install gradio
-# !pip install gradio
-# !pip install langchain_openai
-# !pip install gradio_client
-# !pip install openai
-#
 from typing import List
-import tropos
+from tropos.models.gpt import generate_inline_feedback, generate_summary_feedback
 import gradio as gr
-import shared
-
+from tropos.io_fields import InputFields, OutputFields
 
 # Custom CSS for styling
 css_styling = """
@@ -65,23 +56,26 @@ def reset_interface():
         gr.update(visible=False),
     )
 
+
 def submit_button_updates(essay, requirements, student_id, assignment_id):
     input_data = (
-        shared.InputFields()
+        InputFields()
         .add_student_id(student_id)
         .add_assignment_id(assignment_id)
         .add_requirements_input(requirements)
         .add_student_essay(essay)
     )
 
-    output_data = tropos.generate_summary_feedback(input_data)  # feedback
+    output_data = generate_summary_feedback(input_data)  # feedback
 
     return (
         gr.update(visible=False),  # essay input
         gr.update(visible=False),  # rubric/requirements
         gr.update(visible=False),  # student ID
         gr.update(visible=False),  # assignment ID
-        gr.update(value=output_data.__str__().replace("**",""), visible=True, lines=10),  # feedback
+        gr.update(
+            value=output_data.__str__().replace("**", ""), visible=True, lines=10
+        ),  # feedback
         gr.update(visible=False),  # inline feedback 1
         gr.update(visible=False),  # inline feedback 2
         gr.update(visible=False),  # inline feedback 3
@@ -91,16 +85,14 @@ def submit_button_updates(essay, requirements, student_id, assignment_id):
 
 def show_inline_feedback(essay, requirements, student_id, assignment_id):
     input_data = (
-        shared.InputFields()
+        InputFields()
         .add_student_id(student_id)
         .add_assignment_id(assignment_id)
         .add_requirements_input(requirements)
         .add_student_essay(essay)
     )
 
-    output_data: List[shared.OutputFields] = tropos.generate_inline_feedback(
-        input_data
-    )  # feedback
+    output_data: List[OutputFields] = generate_inline_feedback(input_data)  # feedback
 
     return (
         gr.update(visible=False),  # essay input
