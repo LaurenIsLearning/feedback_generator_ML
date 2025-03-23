@@ -1,6 +1,4 @@
-from spire.doc import *
-from spire.doc.common import *
-
+from docx import Document
 
 class Rubric:
 
@@ -31,10 +29,10 @@ class Rubric:
         return self.comments
 
 
-    def parse_rubric(submission: Document) -> "Rubric":
-        rubric = Rubric()
-        # Logic to parse the rubric from the document
-        # This will depend on the structure of the document
-        # For example, you might look for specific tables or sections
-        # and extract the relevant information
-        return rubric
+def parse_rubric(submission: Document) -> "Rubric":
+    rubric = Rubric()
+    # Logic to parse the rubric from the document
+    # This will depend on the structure of the document
+    # For example, you might look for specific tables or sections
+    # and extract the relevant information
+    return rubric
