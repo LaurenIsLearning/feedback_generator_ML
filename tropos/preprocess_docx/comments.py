@@ -1,8 +1,7 @@
 from spire.doc import *
 from spire.doc.common import *
 
-
-class Requirements:
+class Comments:
 
     # Put the fields for this class here
 
@@ -12,5 +11,5 @@ class Requirements:
     # Define getters and setters, make the setters return self
 
 
-def parse_requirements(requirements: Document) -> Requirements:
+def parse_comments(submission: Document) -> Comments:
     pass

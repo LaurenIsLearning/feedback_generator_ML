@@ -1,7 +1,6 @@
 from spire.doc import *
 from spire.doc.common import *
 
-
 class Submission:
 
     # Put the fields for this class here

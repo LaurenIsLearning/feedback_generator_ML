@@ -6,6 +6,7 @@ from .submission import parse_submission, Submission
 from .requirements import parse_requirements, Requirements
 from .rubric import parse_rubric, Rubric
 
+#student submission data and requirements
 
 class StudentSubmission:
 
