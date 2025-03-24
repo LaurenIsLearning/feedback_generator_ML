@@ -69,15 +69,5 @@ print("Rubric initialized:", rubric)
 
 # -----------------Preprocessing Section---------------------------
 """
-
-# preprocess all data here
-# create paths for submissions, requirements
-# ex. rubric = parse_rubric(submission_doc)
-
-"""# -----------------Model Interface & Feedback Section---------------------------"""
-
-# prompt building and geedback generation
-
-"""# ----------------Gradio or Output UI---------------------------"""
-
-# to wrap into a gradio app
+from tropos import main
+main()
