@@ -1,4 +1,5 @@
-from docx import Document
+from spire.doc import *
+from spire.doc.common import *
 
 from .comments import parse_comments, Comments
 from .submission import parse_submission, Submission

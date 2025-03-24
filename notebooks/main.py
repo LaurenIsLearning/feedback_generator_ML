@@ -45,7 +45,7 @@ processed_data_path = os.path.join(data_base, 'processed')
 """**--Install required libraries**"""
 
 # docx library for Document (intalls as 'docx')
-!pip install bayoo-docx
+!pip install Spire.Doc
 
 """**--Import modules (youre working on)**
 <br>*each of our classes will be what will merge to this notebook (im p sure)*
