@@ -14,10 +14,10 @@ if __name__ == "__main__":
     # Tests the docx data extraction
 
     requirements_doc = Document()
-    requirements_doc.LoadFromFile("./data/sample1/AssignmentRequirements.docx")
+    requirements_doc.LoadFromFile(".data/raw/Requirements.docx")
 
     submission_doc = Document()
-    requirements_doc.LoadFromFile("./data/sample1/StudentSubmission.docx")
+    submission_doc.LoadFromFile("data/raw/Student 1/Student 1 Part 1.docx")
 
     print("Testing StudentSubmission class")
     StudentSubmission(submission_doc, requirements_doc)
