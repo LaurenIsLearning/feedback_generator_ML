@@ -32,7 +32,7 @@ This notebook handles preprocessing, model interaction, and feedback generation.
 
 # Add your src folder to the Python path
 import sys
-sys.path.append('/content/project/src')
+sys.path.append('/content/project/')
 
 # import data path for loading files
 import os
