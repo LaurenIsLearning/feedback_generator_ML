@@ -2,3 +2,6 @@
 
 # Ignore notebook checkpoints and temp files
 .ipynb_checkpoints/
+
+# The notebook file clones the repo, this should not be committed
+project/
