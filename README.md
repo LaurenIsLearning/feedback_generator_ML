@@ -13,12 +13,15 @@ pip install -r requirements.txt
 ```
 
 ### Running
+
 #### Locally
+
 Run this command in the root directory of the repository.
 
 ```tty
 python .
 ```
 
-#### In Google Collab
-Open the `notebook.ipynb` file and run all of the cells.
+#### In Google Colab
+
+Open the `colab_main.ipynb` file in Google Colab and each cell.
