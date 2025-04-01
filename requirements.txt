@@ -2,4 +2,3 @@ gradio
 langchain_openai  # what is this?
 gradio_client
 openai 
-Spire.Doc
