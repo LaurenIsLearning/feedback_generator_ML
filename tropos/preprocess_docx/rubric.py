@@ -86,7 +86,7 @@ def parse_rubric(docx_path: str) -> "Rubric":
       print("Expected rubric column headers not found:", e)
       return rubric
 
-    highlights = extract_highlighted_phrases(docx_path)
+    all_highlights = extract_highlighted_phrases(docx_path)
     baseline = {}
     parsed_rows = []
 
@@ -102,10 +102,13 @@ def parse_rubric(docx_path: str) -> "Rubric":
       criteria_lines = [line.strip() for line in criteria_text.split("\n") if line.strip()]
       baseline[portion] = criteria_lines
 
+      # only match highlights that appear in this specific criteria cell
+      cell_highlights = [h for h in all_highlights if h["text"] in criteria_text]
+
       #match highlights that appear in criteria cell
       matched_criteria = []
       for line in criteria_lines:
-        match = next((h for h in highlights if h["text"] in line), None)
+        match = next((h for h in cell_highlights if h["text"] in line), None)
         matched_criteria.append({
           "text": line,
           "highlighted": match is not None,
