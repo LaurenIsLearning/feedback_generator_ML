@@ -108,7 +108,7 @@ def parse_rubric(docx_path: str) -> "Rubric":
       #match highlights that appear in criteria cell
       matched_criteria = []
       for line in criteria_lines:
-        match = next((h for h in cell_highlights if h["text"] in line), None)
+        match = next((h for h in cell_highlights if h["text"].strip() == line.strip()), None)
         matched_criteria.append({
           "text": line,
           "highlighted": match is not None,
