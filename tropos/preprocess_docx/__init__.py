@@ -31,11 +31,11 @@ class StudentSubmission:
     The students written work
     """
 
-    def __init__(self, submission: str, requirements: str) -> None:
-        self.rubric = parse_rubric(submission)
-        self.submission = parse_submission(submission)
-        self.comments = parse_comments(submission)
-        self.requirements = requirements(Document(requirements_path))
+    def __init__(self, submission_path: str, requirements_path: str) -> None:
+        self.rubric = parse_rubric(submission_path)
+        self.submission = parse_submission(submission_path)
+        self.comments = parse_comments(submission_path)
+        self.requirements = parse_requirements(Document(requirements_path))
         
 
     # TODO: Make getters and setters
