@@ -1,40 +1,34 @@
-from spire.doc import *
-from spire.doc.common import *
+# This file marks tropos as a Python package.
 
-from .comments import parse_comments, Comments
-from .submission import parse_submission, Submission
-from .requirements import parse_requirements, Requirements
-from .rubric import parse_rubric, Rubric
+# from .models.gpt import generate_feedback
+# from .models.trained import load_model
 
-#student submission data and requirements
+from .preprocess_docx.rubric import parse_rubric
+# from .preprocess_docx.submission import parse_submission
+# from .preprocess_docx.requirements import parse_requirements
+# from .preprocess_docx.comments import parse_comments
+from .preprocess_docx import StudentSubmission
 
-class StudentSubmission:
+# Optional UI export
+#from .gradio.ui import launch_ui
 
-    rubric: Rubric
-    """
-    The rubric table at the bottom of the submission document 
-    """
+# from spire.doc import *
+# from spire.doc.common import *
 
-    comments: Comments
-    """
-    The inline comments 
-    """
 
-    requirements: Requirements
-    """
-    The requirements file 
-    """
 
-    submission: Submission
-    """
-    The students written work
-    """
+# Starts the program
+def main():
+    # Tests the ui
+    # make_ui()
 
-    def __init__(self, submission: Document, requirements: Requirements) -> None:
-        self.rubric = parse_rubric(submission)
-        self.submission = parse_submission(submission)
-        self.comments = parse_comments(submission)
-        self.requirements = requirements
+    # Tests the docx data extraction
 
-    # TODO: Make getters and setters
-    #
+    requirements_doc = Document()
+    requirements_doc.LoadFromFile(".data/raw/Requirements.docx")
+
+    submission_doc = Document()
+    submission_doc.LoadFromFile("data/raw/Student 1/Student 1 Part 1.docx")
+
+    print("Testing StudentSubmission class")
+    StudentSubmission(submission_doc, requirements_doc)
