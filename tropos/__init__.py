@@ -12,8 +12,8 @@ from .preprocess_docx import StudentSubmission
 # Optional UI export
 #from .gradio.ui import launch_ui
 
-from spire.doc import *
-from spire.doc.common import *
+# from spire.doc import *
+# from spire.doc.common import *
 
 
 

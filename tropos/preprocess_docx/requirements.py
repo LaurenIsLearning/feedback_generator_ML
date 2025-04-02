@@ -1,5 +1,6 @@
-from spire.doc import *
-from spire.doc.common import *
+# from spire.doc import *
+# from spire.doc.common import *
+from docx import Document
 
 class Requirements:
 

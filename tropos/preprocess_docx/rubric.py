@@ -9,25 +9,25 @@ from docx import Document
 # --------------------------
 class Rubric:
     def __init__(self):
-        self.criteria = []  # List of full rubric rows (each as a dictionary)
-        self.comments = []  # Just the freeform feedback text (optional)
+        self.baseline = []  # full rubric without instructor input
+        self.commented = [] # instructor interventions (highlight+comments)
 
-    def set_criteria(self, criteria):
-        self.criteria = criteria
+    def set_baseline(self, baseline):
+        self.baseline = baseline
         return self
 
-    def get_criteria(self):
-        return self.criteria
+    def get_baseline(self):
+        return self.baseline
 
-    def set_comments(self, comments):
-        self.comments = comments
+    def set_commented(self, commented):
+        self.commented = commented
         return self
 
-    def get_comments(self):
-        return self.comments
+    def get_commented(self):
+        return self.commented
 
 # --------------------------
-# Extracts highlighted text from .docx (reads document.xml directly)
+# Extracts highlighted text from document.xml
 # --------------------------
 def extract_highlighted_phrases(docx_path):
   # opens .docx like a zip archive
@@ -40,7 +40,6 @@ def extract_highlighted_phrases(docx_path):
   namespaces = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
   highlighted_phrases = []
 
-  #loop through all <w:r> (text runs) in doc
   # extract highlight and attached text
   for run in root.findall(".//w:r", namespaces):
     rpr = run.find("w:rPr", namespaces)
@@ -88,8 +87,8 @@ def parse_rubric(docx_path: str) -> "Rubric":
       return rubric
 
     highlights = extract_highlighted_phrases(docx_path)
-    criteria_data = []
-    comments = []
+    baseline = {}
+    parsed_rows = []
 
     # Go through each subsequent row in the rubric
     for row in table.rows[1:]:
@@ -99,23 +98,28 @@ def parse_rubric(docx_path: str) -> "Rubric":
       criteria_text = cells[idx_criteria].text.strip()
       feedback = cells[idx_feedback].text.strip()
 
-      #match highlights that appear in criteria cell
-      matched_highlights = highlights
+      #split criteria into bullet points/lines
+      criteria_lines = [line.strip() for line in criteria_text.split("\n") if line.strip()]
+      baseline[portion] = criteria_lines
 
-      # Store this entire row in a structured format
-      criteria_data.append({
+      #match highlights that appear in criteria cell
+      matched_criteria = []
+      for line in criteria_lines:
+        match = next((h for h in highlights if h["text"] in line), None)
+        matched_criteria.append({
+          "text": line,
+          "highlighted": match is not None,
+          "highlight": match["highlight"] if match else None
+        })
+
+      parsed_rows.append({
         "portion": portion,
-        "criteria": {
-        "text": criteria_text,
-        "highlights": matched_highlights
-        },
-        "feedback": feedback
+        "criteria": matched_criteria,
+        "overall_feedback": feedback
       })
 
-      comments.append(feedback)  # For quick access later if needed
-
     # Attach the parsed info to the Rubric object
-    rubric.set_criteria(criteria_data)
-    rubric.set_comments(comments)
+    rubric.set_baseline(baseline)
+    rubric.set_commented(parsed_rows)
 
     return rubric
