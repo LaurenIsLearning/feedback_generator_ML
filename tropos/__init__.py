@@ -8,6 +8,8 @@ from .preprocess_docx.submission import parse_submission
 from .preprocess_docx.requirements import parse_requirements
 from .preprocess_docx.comments import parse_comments
 from .preprocess_docx import StudentSubmission
+from .preprocess_docx.inline_feedback import CommentExtractor, extract_comments
+
 
 # Optional UI export
 from .gradio.ui import launch_ui
