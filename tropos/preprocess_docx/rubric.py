@@ -70,7 +70,13 @@ def parse_rubric(doc_path: str) -> "Rubric":
 
       #split criteria into individual labeled criteria
       criteria_lines = [line.strip() for line in criteria_text.split('\n') if line.strip()]
-      criteria_list = [{"text": line} for line in criteria_lines]
+      criteria_list = [
+        {
+          "id": f"{portion.lower().replace(' ', '_')}_c{i+1}",
+          "text": line
+         }
+        for i, line in enumerate(criteria_lines)
+      ]
       
       # Separate feedback into individual comments (by newlines or sentence boundaries)
       if "\n" in feedback:
@@ -79,7 +85,13 @@ def parse_rubric(doc_path: str) -> "Rubric":
             feedback_parts = re.split(r'(?<=[.!?])\s+(?=[A-Z])', feedback)
             feedback_parts = [part.strip() for part in feedback_parts if part.strip()]
 
-      feedback_list = [{"text": part} for part in feedback_parts]
+      feedback_list = [
+        {
+          "id": f"{portion.lower().replace(' ', '_')}_f{i+1}",
+          "text": part
+        }
+        for i, part in enumerate(feedback_parts)
+      ]
 
       # Store this entire row in a structured format
       criteria_data.append({
