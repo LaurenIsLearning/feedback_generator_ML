@@ -79,14 +79,16 @@ def parse_rubric(doc_path: str) -> "Rubric":
             feedback_parts = re.split(r'(?<=[.!?])\s+(?=[A-Z])', feedback)
             feedback_parts = [part.strip() for part in feedback_parts if part.strip()]
 
+      feedback_list = [{"text": part} for part in feedback_parts]
+
       # Store this entire row in a structured format
       criteria_data.append({
         "portion": portion,
         "criteria": criteria_list,
-        "feedback": feedback_parts
+        "feedback": feedback_list
       })
 
-      comments.extend(feedback_parts)  # For quick access later if needed
+      comments.extend(feedback_list)  # For quick access later if needed
 
     # Attach the parsed info to the Rubric object
     rubric.set_criteria(criteria_data)
