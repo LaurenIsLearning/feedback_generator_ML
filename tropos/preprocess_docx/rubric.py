@@ -83,10 +83,10 @@ def parse_rubric(doc_path: str) -> "Rubric":
       criteria_data.append({
         "portion": portion,
         "criteria": criteria_list,
-        "feedback": feedback
+        "feedback": feedback_parts
       })
 
-      comments.append(feedback)  # For quick access later if needed
+      comments.extend(feedback_parts)  # For quick access later if needed
 
     # Attach the parsed info to the Rubric object
     rubric.set_criteria(criteria_data)
