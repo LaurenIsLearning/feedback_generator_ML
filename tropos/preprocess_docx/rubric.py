@@ -1,5 +1,6 @@
 from docx import Document
 import json
+import re
 
 # --------------------------
 # Rubric Data Class
