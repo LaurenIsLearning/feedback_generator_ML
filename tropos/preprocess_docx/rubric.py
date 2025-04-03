@@ -1,4 +1,5 @@
 from docx import Document
+import json
 
 # --------------------------
 # Rubric Data Class
@@ -66,13 +67,21 @@ def parse_rubric(doc_path: str) -> "Rubric":
       criteria_text = cells[idx_criteria].text.strip()
       feedback = cells[idx_feedback].text.strip()
 
+      #split criteria into individual labeled criteria
+      criteria_lines = [line.strip() for line in criteria_text.split('\n') if line.strip()]
+      criteria_list = [{"text": line} for line in criteria_lines]
+      
+      # Separate feedback into individual comments (by newlines or sentence boundaries)
+      if "\n" in feedback:
+            feedback_parts = [part.strip() for part in feedback.split('\n') if part.strip()]
+      else:
+            feedback_parts = re.split(r'(?<=[.!?])\s+(?=[A-Z])', feedback)
+            feedback_parts = [part.strip() for part in feedback_parts if part.strip()]
+
       # Store this entire row in a structured format
       criteria_data.append({
         "portion": portion,
-        "criteria": {
-        "text": criteria_text,
-        # TODO: "highlights": highlights
-        },
+        "criteria": criteria_list,
         "feedback": feedback
       })
 
