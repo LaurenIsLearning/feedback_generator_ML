@@ -11,7 +11,7 @@ class Comments:
         self.comments = []
         self.comment_refs = {}
 
-    def extract_comments(self):
+    def parse_comments(self):
         """Main method to extract all comments and their context"""
         self._extract_comment_content()
         self._find_comment_references()
