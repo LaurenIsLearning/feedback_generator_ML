@@ -1,27 +1,28 @@
-from docx import Document 
+from docx import Document  
 
-class Submission:
+class AssignmentRequirements:
     def __init__(self):
-        self._content = ""
+        self._instructions = ""
 
-    def set_content(self, content):
-        self._content = content
+    def set_instructions(self, text):
+        self._instructions = text
         return self
     
-    def get_content(self):
-        return self._content
+    def get_instructions(self):
+        return self._instructions
 
-def parse_submission(submission: Document) -> Submission:  # Now uses python-docx Document
-    """Preserves original logic with python-docx syntax"""
-    sub = Submission()
+def parse_requirements(doc_path: str) -> AssignmentRequirements: 
+    """Original logic adapted for python-docx"""
+    req = AssignmentRequirements()
     try:
-        content = []
-        # Python-docx equivalent of Spire's text extraction
-        for para in submission.paragraphs:
+        doc = Document(doc_path)  # python-docx loading
+        instructions = []
+        for para in doc.paragraphs:
             text = para.text.strip()
             if text:
-                content.append(text)
-        sub.set_content("\n".join(content))
+                instructions.append(text)
+        req.set_instructions("\n".join(instructions))
+        
     except Exception as e:
-        sub.set_content(f"Error: {str(e)}")
-    return sub
+        req.set_instructions(f"Error: {str(e)}")
+    return req
