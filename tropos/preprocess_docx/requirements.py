@@ -1,10 +1,8 @@
-from docx import Document
-from .text_extractor import AssignmentTextExtractor
+from docx import Document  
 
 class Requirements:
     def __init__(self):
         self._instructions = ""
-        self.metadata = {}
 
     def set_instructions(self, text):
         self._instructions = text
@@ -13,12 +11,17 @@ class Requirements:
     def get_instructions(self):
         return self._instructions
 
-def parse_requirements(doc_path: str) -> Requirements:
-    """Mirrors your submission.py structure"""
+def parse_requirements(doc_path: str) -> Requirements: 
+    """Original logic adapted for python-docx"""
     req = Requirements()
     try:
-        extractor = AssignmentTextExtractor(doc_path)
-        instructions = extractor.extract_instructions()
-        return req.set_instructions(instructions)
+        doc = Document(doc_path)  # python-docx loading
+        instructions = []
+        for para in doc.paragraphs:
+            text = para.text.strip()
+            if text:
+                instructions.append(text)
+        req.set_instructions("\n".join(instructions))
     except Exception as e:
-        return req.set_instructions(f"Error: {str(e)}")
+        req.set_instructions(f"Error: {str(e)}")
+    return req
