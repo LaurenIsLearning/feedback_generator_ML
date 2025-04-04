@@ -6,9 +6,8 @@ from .models.trained import load_model
 from .preprocess_docx.rubric import parse_rubric
 from .preprocess_docx.submission import parse_submission
 from .preprocess_docx.requirements import parse_requirements
-from .preprocess_docx.comments import parse_comments
+from .preprocess_docx.comments import Comments, parse_comments
 from .preprocess_docx import StudentSubmission
-from .preprocess_docx.inline_feedback import CommentExtractor, extract_comments
 
 
 # Optional UI export
