@@ -13,11 +13,6 @@ from .preprocess_docx import StudentSubmission
 # Optional UI export
 from .gradio.ui import launch_ui
 
-from spire.doc import *
-from spire.doc.common import *
-
-
-
 # Starts the program
 def main():
     # Tests the ui
