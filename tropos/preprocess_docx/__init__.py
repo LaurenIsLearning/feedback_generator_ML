@@ -4,7 +4,7 @@ from docx import Document
 
 from .comments import parse_comments, Comments
 from .submission import parse_submission, Submission
-from .requirements import parse_requirements, Requirements
+from .assignment_requirements import parse_requirements, AssignmentRequirements
 from .rubric import parse_rubric, Rubric
 
 #student submission data and requirements
@@ -21,7 +21,7 @@ class StudentSubmission:
     The inline comments 
     """
 
-    requirements: Requirements
+    requirements: AssignmentRequirements
     """
     The requirements file 
     """
@@ -35,7 +35,7 @@ class StudentSubmission:
         self.rubric = parse_rubric(submission_path)
         self.submission = parse_submission(submission_path)
         self.comments = parse_comments(submission_path)
-        self.requirements = parse_requirements(Document(requirements_path))
+        self.assignment_requirements = parse_requirements(Document(requirements_path))
         
 
     # TODO: Make getters and setters
