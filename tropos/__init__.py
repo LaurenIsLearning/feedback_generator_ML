@@ -1,7 +1,7 @@
 # This file marks tropos as a Python package.
 
-from .models.gpt import generate_feedback
-from .models.trained import load_model
+#from .models.gpt import generate_feedback
+#from .models.trained import load_model
 
 from .preprocess_docx.rubric import parse_rubric
 from .preprocess_docx.submission import parse_submission
@@ -11,7 +11,7 @@ from .preprocess_docx import StudentSubmission
 
 
 # Optional UI export
-from .gradio.ui import launch_ui
+#from .gradio.ui import launch_ui
 
 # Starts the program
 def main():
