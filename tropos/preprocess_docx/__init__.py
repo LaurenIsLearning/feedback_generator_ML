@@ -8,23 +8,7 @@ from .rubric import parse_rubric, Rubric
 #student submission data and requirements
 
 class StudentSubmission:
-  cached_requirements = None
-
-    def __init__(self, submission_path: str, requirements_path: str) -> None:
-        self.submission_path = submission_path
-        self.requirements_path = requirements_path
-        self.rubric = parse_rubric(submission_path)
-        self.submission = parse_submission(Document(submission_path))
-        self.comments = Comments(submission_path).parse_comments()
-
-        # to use cache or parse if provided
-        if StudentSubmission.cached_requirements:
-          self.assignment_requirements = StudentSubmission.cached_requirements
-        elif requirements_path:
-          self.assignment_requirements = parse_requirements(Document(requirements_path))
-          StudentSubmission.cached_requirements = self.assignment_requirements
-        else:
-          self.assignment_requirements = None
+    cached_requirements = None
 
     rubric: Rubric
     """
@@ -42,6 +26,21 @@ class StudentSubmission:
     """
     The students written work
     """
+    def __init__(self, submission_path: str, requirements_path: str) -> None:
+      self.submission_path = submission_path
+      self.requirements_path = requirements_path
+      self.rubric = parse_rubric(submission_path)
+      self.submission = parse_submission(Document(submission_path))
+      self.comments = Comments(submission_path).parse_comments()
+
+      # to use cache or parse if provided
+      if StudentSubmission.cached_requirements:
+        self.assignment_requirements = StudentSubmission.cached_requirements
+      elif requirements_path:
+        self.assignment_requirements = parse_requirements(Document(requirements_path))
+        StudentSubmission.cached_requirements = self.assignment_requirements
+      else:
+        self.assignment_requirements = None
 
     #-----------------------------------------------
     # utility methods to use directly in prompting

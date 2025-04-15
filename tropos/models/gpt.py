@@ -1,7 +1,7 @@
 from tropos import StudentSubmission
 import openai
 import time
-from openai.error import RateLimitError
+from openai import OpenAIError
 
 #---------------
 # Prompt Variants
@@ -21,9 +21,13 @@ def build_zeroshot_prompt(target: StudentSubmission):
     {target.get_submission_text()}
 
     🧑‍🏫 Please provide feedback using this format:
-    - "Quoted sentence" – Your comment.
+    - "Quoted student sentence" – Your feedback in plain English.
 
-    Include a 'Summary Feedback:' section at the end.
+    Summary Feedback:
+    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
+
+    ⚠️ Only use the format: - "Quoted student sentence" – feedback
+    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
     """
 
 def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "StudentSubmission"):
@@ -60,13 +64,14 @@ def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "
     📄 New Essay:
     {target_essay}
 
-    🧑‍🏫 Please provide feedback for this student as if you were the same instructor. Use the rubric and requirements to guide your response.
+    🧑‍🏫 Please provide feedback using this format:
+    - "Quoted student sentence" – Your feedback in plain English.
 
-    Provide:
-    1. Inline feedback: For each piece of inline feedback, use the format:
-      - "Quoted student sentence" – Your feedback in plain English.
+    Summary Feedback:
+    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
 
-    2. Summary Feedback – At the end, provide a 'Summary Feedback:' section, starting with that exact heading, followed by 2–3 paragraphs of general praise and suggestions.
+    ⚠️ Only use the format: - "Quoted student sentence" – feedback
+    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
     """
 
 def build_fewshot_prompt(examples: list, target: StudentSubmission):
@@ -95,13 +100,14 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission):
       📄 New Essay:
       {target.get_submission_text()}
 
-      🧑‍🏫 Please provide feedback for this student as if you were the same instructor. Use the rubric and requirements to guide your response.
+      🧑‍🏫 Please provide feedback using this format:
+      - "Quoted student sentence" – Your feedback in plain English.
 
-      Provide:
-      1. Inline feedback: For each piece of inline feedback, use the format:
-        - "Quoted student sentence" – Your feedback in plain English.
+      Summary Feedback:
+      At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
 
-      2. Summary Feedback – At the end, provide a 'Summary Feedback:' section, starting with that exact heading, followed by 2–3 paragraphs of general praise and suggestions.
+      ⚠️ Only use the format: - "Quoted student sentence" – feedback
+   s   Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
       """
 
 # --------------------------
@@ -133,7 +139,7 @@ def call_chatgpt(prompt: str, model="gpt-4o", temperature=0.7, max_tokens=1500, 
 
     raise RuntimeError("❌ Failed after multiple retries due to rate limits.")
 
-def call_chatgpt2(prompt: str, model="gpt-4o", temperature=0.7, max_tokens=1500. retries = 3) -> str:
+def call_chatgpt2(prompt: str, model="gpt-4o", temperature=0.7, max_tokens=1500, retries = 3) -> str:
     response = openai.chat.completions.create(
         model=model,
         messages=[

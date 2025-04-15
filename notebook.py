@@ -55,26 +55,97 @@ os.environ["OPENAI_API_KEY"] = openai_key
 
 from tropos import StudentSubmission
 from tropos.models import gpt
-
-example = StudentSubmission(
-    "/content/project/data/raw/Student_1/Student_1_Part_1.docx",
-    "/content/project/data/raw/Requirements.docx")
-target = StudentSubmission(
-    "/content/project/data/unmarked_raw/Uncommented_Student_1.docx",
-    "/content/project/data/raw/Requirements.docx")
-
-feedback = gpt.generate_feedback(example, target)
-print(feedback)
-
 from tropos.docx_writer import write_feedback_to_docx
+from utils.feedback_formatting import format_feedback_blocks
+import os
 
-#write to docx with feedback
-write_feedback_to_docx(
-    submission_path="/content/project/data/unmarked_raw/Uncommented_Student_1.docx",
-    feedback_text=feedback,
-    output_path="/content/project/data/generated_output/CommentedOneShot_Student_1.docx"
+#load first submission with cached requirements
+requirements_path = "/content/project/data/raw/Requirements.docx"
+exampleStudent1part1 = StudentSubmission("/content/project/data/raw/Student_1/Student_1_Part_1.docx", requirements_path)
+
+#----one student across multiple parts
+exampleStudent1part2 = StudentSubmission("/content/project/data/raw/Student_1/Student_1_Part_2.docx", requirements_path)
+exampleStudent1part3 = StudentSubmission("/content/project/data/raw/Student_1/Student_1_Part_3.docx", requirements_path)
+exampleStudent1partfinal = StudentSubmission("/content/project/data/raw/Student_1/Student_1_Final.docx", requirements_path)
+
+#----diff students part1
+exampleStudent2part1 = StudentSubmission("/content/project/data/raw/Student_2/Student_2_Part_1.docx", requirements_path)
+exampleStudent3part1 = StudentSubmission("/content/project/data/raw/Student_3/Student_3_Part_1.docx", requirements_path)
+exampleStudent4part1 = StudentSubmission("/content/project/data/raw/Student_4/Student_4_Part_1.docx", requirements_path)
+exampleStudent5part1 = StudentSubmission("/content/project/data/raw/Student_5/Student_5_Part_1.docx", requirements_path)
+
+#--target papers (uncommented/raw)
+target1 = StudentSubmission("/content/project/data/unmarked_raw/Uncommented_Student_1.docx", requirements_path)
+target2 = StudentSubmission("/content/project/data/unmarked_raw/Uncommented_Student_2.docx", requirements_path)
+target3 = StudentSubmission("/content/project/data/unmarked_raw/Uncommented_Student_3.docx", requirements_path)
+target4 = StudentSubmission("/content/project/data/unmarked_raw/Uncommented_Student_4.docx", requirements_path)
+
+
+#promot example sets
+oneshot_example = exampleStudent1part1
+fewshot_same_student = [
+    exampleStudent1part1,
+    exampleStudent1part2,
+    exampleStudent1part3,
+    exampleStudent1partfinal
+]
+fewshot_diff_part1 = [
+    exampleStudent1part1,
+    exampleStudent2part1,
+    exampleStudent3part1,
+    exampleStudent4part1,
+    #exampleStudent5part1
+]
+
+#list of targets
+targets = [
+    ("Student1", target1),
+    ("Student2", target2),
+    ("Student3", target3),
+    ("Student4", target4)
+]
+
+#prompt builder functions
+from tropos.models.gpt import (
+    build_zeroshot_prompt,
+    build_oneshot_prompt,
+    build_fewshot_prompt
 )
 
-#from utils.feedback_formatting import format_feedback_blocks
-#format_feedback_blocks(feedback)
+#define prompt variants
+prompt_variants = [
+    ("ZeroShot", build_zeroshot_prompt),
+    ("OneShot", lambda t: build_oneshot_prompt(
+        oneshot_example, t)),
+    ("FewShotSameStudent", lambda t: build_fewshot_prompt(
+        fewshot_same_student, t)),
+    ("FewShotDiffStudents", lambda t: build_fewshot_prompt(
+        fewshot_diff_part1, t)),
+]
 
+
+#run all combos
+for target_label, target in targets:
+    for variant_label, builder in prompt_variants:
+        print(f"\n🧠 Generating {variant_label} feedback for {target_label}...")
+        prompt = builder(target)
+        feedback = gpt.call_chatgpt(prompt)
+
+        print(f"\n--- {variant_label} Feedback for {target_label} ---\n")
+        format_feedback_blocks(feedback, width=80)
+
+        output_path = f"/content/project/data/generated_output/{variant_label}_{target_label}.docx"
+        write_feedback_to_docx(
+            submission_path=target.submission_path,
+            feedback_text=feedback,
+            output_path=output_path
+        )
+
+        print(f"✅ Saved to {output_path}")
+
+import shutil
+import os
+shutil.make_archive('/content/folder_name', 'zip', '/content/project/data/generated_output')
+
+from google.colab import files
+files.download('/content/folder_name.zip')
