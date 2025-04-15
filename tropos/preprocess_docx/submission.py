@@ -1,4 +1,5 @@
 from docx import Document
+from docx import table
 from docx.table import Table
 from docx.text.paragraph import Paragraph
 
@@ -25,20 +26,22 @@ def iter_block_items(doc):
             yield Table(child, doc)
 
 def parse_submission(doc: Document) -> Submission:
-    """Extracts all paragraph text before the final table (rubric)."""
+    """Extracts all paragraph text before the final table (rubric), or all text if no table exists."""
     sub = Submission()
     try:
         content = []
         blocks = list(iter_block_items(doc))
         
         # Find the index of the last table (rubric)
-        last_table_index = max(
-            (i for i, block in enumerate(blocks) if isinstance(block, Table)),
-            default=len(blocks)
-        )
+        table_indices = [i for i, block in enumerate(blocks) if isinstance(block, Table)]
+        if table_indices:
+          last_table_index = max(table_indices)
+          paragraph_blocks = blocks[:last_table_index] #cut before rubric
+        else:
+          paragraph_blocks = blocks #no rubric, then keep all
 
         # Collect paragraph text before the last table
-        for block in blocks[:last_table_index]:
+        for block in paragraph_blocks:
             if isinstance(block, Paragraph):
                 text = block.text.strip()
                 if text:

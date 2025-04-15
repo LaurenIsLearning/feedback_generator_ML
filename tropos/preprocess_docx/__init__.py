@@ -11,7 +11,7 @@ class StudentSubmission:
 
     def __init__(self, submission_path: str, requirements_path: str) -> None:
         self.rubric = parse_rubric(submission_path)
-        self.submission = parse_submission(submission_path)
+        self.submission = parse_submission(Document(submission_path))
         self.comments = Comments(submission_path).parse_comments()
         self.assignment_requirements = parse_requirements(Document(requirements_path))
 

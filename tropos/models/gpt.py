@@ -1,3 +1,5 @@
+import openai
+
 #---------------
 # Build Prompt
 #---------------
@@ -36,7 +38,7 @@ def build_feedback_prompt(student_example: "StudentSubmission", student_target: 
 # ChatGPT API Caller
 # --------------------------
 def call_chatgpt(prompt: str, model="gpt-4", temperature=0.7, max_tokens=1500) -> str:
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": "You are a college writing professor providing detailed feedback."},
@@ -45,7 +47,7 @@ def call_chatgpt(prompt: str, model="gpt-4", temperature=0.7, max_tokens=1500) -
         temperature=temperature,
         max_tokens=max_tokens
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 # --------------------------
 # Public API: Generate Feedback
@@ -53,3 +55,4 @@ def call_chatgpt(prompt: str, model="gpt-4", temperature=0.7, max_tokens=1500) -
 def generate_feedback(student_example: "StudentSubmission", student_target: "StudentSubmission") -> str:
     prompt = build_feedback_prompt(student_example, student_target)
     return call_chatgpt(prompt)
+
