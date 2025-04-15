@@ -42,8 +42,10 @@ def build_feedback_prompt(student_example: "StudentSubmission", student_target: 
     🧑‍🏫 Please provide feedback for this student as if you were the same instructor. Use the rubric and requirements to guide your response.
 
     Provide:
-    1. Inline Feedback – quote or summarize the parts being addressed and comment on them
-    2. Summary Feedback – praise strengths, then list 2–3 clear areas to improve
+    1. Inline feedback: For each piece of inline feedback, use the format:
+      - "Quoted student sentence" – Your feedback in plain English.
+
+    2. Summary Feedback – At the end, provide a 'Summary Feedback:' section, starting with that exact heading, followed by 2–3 paragraphs of general praise and suggestions.
     """
 
 # --------------------------

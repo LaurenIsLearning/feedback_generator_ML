@@ -14,45 +14,43 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
         inline_text = feedback_text
         summary_text = ""
 
-    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("-")]
+    # Parse inline feedback lines
+    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- ")]
+    
+    # Extract quote-comment pairs from lines starting with '- "quoted text"' format
+    feedback_pairs = []
+    for line in inline_lines:
+        if '"' in line:
+            try:
+                quoted = line.split('"')[1]
+                comment = line.split('"')[2].strip(" -–—:")  # trims various dashes and colons
+                feedback_pairs.append((quoted.strip(), comment.strip()))
+            except IndexError:
+                continue
 
-    # Create a new document for output
-    output_doc = Document()
-
-    # Add original paragraphs with feedback injected
+    # Inject feedback into paragraphs
     for para in doc.paragraphs:
-        p = output_doc.add_paragraph()
-        added = False
-        for line in inline_lines:
-            if line.startswith("- \"") and "\" -" in line:
-                quoted, comment = line.split("\" -", 1)
-                quoted = quoted[3:]  # remove leading - "
-                comment = comment.strip()
+        for quoted, comment in feedback_pairs:
+            if quoted in para.text:
+                # Split the paragraph where the quote appears
+                parts = para.text.split(quoted)
+                if len(parts) >= 2:
+                    para.clear()
+                    para.add_run(parts[0])
+                    bold_run = para.add_run(quoted)
+                    bold_run.bold = True
+                    italic_run = para.add_run(f" [{comment}]")
+                    italic_run.italic = True
+                    para.add_run(parts[1])
+                break
 
-                if quoted in para.text:
-                    before, match, after = para.text.partition(quoted)
-
-                    p.add_run(before)
-                    match_run = p.add_run(match)
-                    match_run.bold = True
-
-                    feedback_run = p.add_run(f" [{comment}]")
-                    feedback_run.italic = True
-
-                    p.add_run(after)
-                    added = True
-                    break
-
-        if not added:
-            p.add_run(para.text)
-
-    # Add a horizontal rule then summary
-    output_doc.add_paragraph("\n")
-    summary_header = output_doc.add_paragraph("Summary Feedback:")
+    # Add summary section
+    doc.add_paragraph("")  # spacing
+    summary_header = doc.add_paragraph("Summary Feedback:")
     summary_header.runs[0].bold = True
 
     for line in summary_text.strip().split("\n"):
-        if line:
-            output_doc.add_paragraph(line.strip())
+        if line.strip():
+            doc.add_paragraph(line.strip())
 
-    output_doc.save(output_path)
+    doc.save(output_path)

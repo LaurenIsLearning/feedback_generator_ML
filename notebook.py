@@ -72,7 +72,7 @@ from tropos.docx_writer import write_feedback_to_docx
 write_feedback_to_docx(
     submission_path="/content/project/data/unmarked_raw/Uncommented_Student_1.docx",
     feedback_text=feedback,
-    output_path="/content/project/data/output/Commented_Student_1.docx"
+    output_path="/content/project/data/generated_output/CommentedOneShot_Student_1.docx"
 )
 
 #from utils.feedback_formatting import format_feedback_blocks
