@@ -24,6 +24,19 @@ class Rubric:
     def get_comments(self):
         return self.comments
 
+
+#-----------------------
+# Formatting for prompt
+#-----------------------
+    def format_for_prompt(self):
+        text = ""
+        for portion in self.criteria:
+            text += f"\n== {portion['portion']} ==\n"
+            for crit in portion['criteria']:
+                text += f"- {crit['text']}\n"
+        return text.strip()
+
+
 # --------------------------
 # Extracts highlighted text from a cell (ideal criteria column)
 # TODO: implement later
