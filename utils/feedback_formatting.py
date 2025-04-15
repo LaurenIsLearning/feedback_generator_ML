@@ -1,8 +1,11 @@
-def format_feedback_blocks(feedback: str):
+import textwrap
+
+def format_feedback_blocks(feedback: str, width=80):
+    from termcolor import colored  # optional, for color
     lines = feedback.splitlines()
     in_summary = False
 
-    print("🧑‍🏫 𝗜𝗻𝘀𝘁𝗿𝘂𝗰𝘁𝗼𝗿 𝗙𝗲𝗲𝗱𝗯𝗮𝗰𝗸\n")
+    print("📝", "Instructor Feedback\n")
 
     for line in lines:
         line = line.strip()
@@ -12,16 +15,20 @@ def format_feedback_blocks(feedback: str):
 
         if "summary feedback" in line.lower():
             in_summary = True
-            print("📝 𝗦𝘂𝗺𝗺𝗮𝗿𝘆 𝗙𝗲𝗲𝗱𝗯𝗮𝗰𝗸\n")
+            print("\n📌 Summary Feedback\n")
             continue
 
         if in_summary:
-            print(f"   {line}")
+            wrapped = textwrap.fill(line, width=width)
+            print(wrapped)
         else:
             if line.startswith("- "):
-                quoted, comment = line[2:].split('"', 2)[1], line[2:].split('"', 2)[2]
-                print(f'🔹 "{quoted.strip()}"\n   👉 {comment.strip()}\n')
+                parts = line[2:].split('"', 2)
+                if len(parts) >= 3:
+                    quoted = parts[1].strip()
+                    comment = parts[2].strip(" -:")
+                    print(textwrap.fill(f'🗨️  "{quoted}"\n👉 {comment}', width=width))
+                else:
+                    print(textwrap.fill(f"👉 {line[2:]}", width=width))
             else:
-                print(f"   {line}")
-
-format_feedback_blocks(feedback)
+                print(textwrap.fill(line, width=width))

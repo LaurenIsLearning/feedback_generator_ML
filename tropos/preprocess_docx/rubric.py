@@ -28,13 +28,22 @@ class Rubric:
 #-----------------------
 # Formatting for prompt
 #-----------------------
-    def format_for_prompt(self):
-        text = ""
-        for portion in self.criteria:
+def format_clean_and_feedback(self) -> str:
+    """Returns a rubric formatted with ideal criteria AND past instructor feedback per section."""
+    text = "📋 Official Rubric Criteria:\n"
+    for portion in self.criteria:
+        text += f"\n== {portion['portion']} ==\n"
+        for crit in portion['criteria']:
+            text += f"- {crit['text']}\n"
+
+    text += "\n\n🧑‍🏫 Instructor’s Past Feedback by Section:\n"
+    for portion in self.criteria:
+        if portion["feedback"]:
             text += f"\n== {portion['portion']} ==\n"
-            for crit in portion['criteria']:
-                text += f"- {crit['text']}\n"
-        return text.strip()
+            for fb in portion["feedback"]:
+                text += f"💬 {fb['text']}\n"
+    return text.strip()
+
 
 
 # --------------------------
