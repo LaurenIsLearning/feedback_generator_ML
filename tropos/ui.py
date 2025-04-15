@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 
-# Custom CSS for styling 
+# Custom CSS for styling (keep your original styles)
 css_styling = """
 ... [same as your original CSS] ...
 """
