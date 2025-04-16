@@ -7,6 +7,8 @@ from .preprocess_docx.rubric import parse_rubric
 from .preprocess_docx.submission import parse_submission
 from .preprocess_docx.assignment_requirements import parse_requirements
 from .preprocess_docx.comments import Comments, parse_comments
+from .preprocess_docx.scraper1 import process_student_submissions, RubricProcessor
+
 from .preprocess_docx import StudentSubmission
 
 
@@ -27,4 +29,6 @@ def main():
     submission_doc.LoadFromFile("data/raw/Student 1/Student 1 Part 1.docx")
 
     print("Testing StudentSubmission class")
+    StudentSubmission(submission_doc, requirements_doc)
+
     StudentSubmission(submission_doc, requirements_doc)
