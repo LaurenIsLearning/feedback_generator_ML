@@ -25,5 +25,6 @@ def test_feedback_console(
 def main():
     # Local dev version — fallback to default
     test_feedback_console()
-
+__all__ = ["test_feedback_console", "main"]
+=======
 __all__ = ["test_feedback_console", "main"]
