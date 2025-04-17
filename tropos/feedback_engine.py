@@ -1,4 +1,4 @@
-from tropos.models.model.model_router import call_model
+from tropos.models.model_router import call_model
 from tropos.models.prompt_builder import build_prompt
 from utils.student_loader import load_all_student_examples_recursive, load_all_targets_recursive
 from tropos.docx_writer import write_feedback_to_docx

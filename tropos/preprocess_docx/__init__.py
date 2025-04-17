@@ -37,8 +37,13 @@ class StudentSubmission:
       if StudentSubmission.cached_requirements:
         self.assignment_requirements = StudentSubmission.cached_requirements
       elif requirements_path:
-        self.assignment_requirements = parse_requirements(Document(requirements_path))
-        StudentSubmission.cached_requirements = self.assignment_requirements
+        try:
+            doc = Document(requirements_path)
+            self.assignment_requirements = parse_requirements(doc)
+            StudentSubmission.cached_requirements = self.assignment_requirements
+        except Exception as e:
+            print(f"❌ Failed to load requirements at {requirements_path}: {e}")
+            self.assignment_requirements = None
       else:
         self.assignment_requirements = None
 

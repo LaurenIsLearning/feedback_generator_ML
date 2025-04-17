@@ -1,4 +1,4 @@
-from tropos import StudentSubmission
+from tropos.preprocess_docx import StudentSubmission
 import openai
 import time
 from openai import OpenAIError

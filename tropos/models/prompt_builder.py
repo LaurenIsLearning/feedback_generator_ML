@@ -1,6 +1,6 @@
 #builds prompts for all models
 
-from tropos import StudentSubmission
+from tropos.preprocess_docx import StudentSubmission
 
 # Build prompt with below variants
 def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):

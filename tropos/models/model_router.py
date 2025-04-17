@@ -1,6 +1,5 @@
 # Routes prompt calls to GPT or Gemini ect
-from tropos import StudentSubmission
-
+from tropos.preprocess_docx import StudentSubmission
 from tropos.models import gpt, gemini
 
 # set up for default to be gpt-4o unless otherwise stated

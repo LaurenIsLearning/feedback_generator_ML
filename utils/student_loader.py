@@ -1,6 +1,6 @@
 
 import os
-from tropos import StudentSubmission
+from tropos.preprocess_docx import StudentSubmission
 
 def load_all_student_examples_recursive(base_dir, requirements_path, valid_ext=".docx", verbose = False):
     """
