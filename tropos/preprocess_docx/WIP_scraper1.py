@@ -160,3 +160,97 @@ class RubricProcessor:
         if re.search(r"student[ _]\d+", name):
             return "final"
         return None
+    
+##WHAT WOULD GO IN A/THE NOTEBOOK
+## Import and call main functionfrom tropos import main
+#main()
+#import os
+#import re
+#import sys
+#import json
+#from pathlib import Path
+#from collections import defaultdict
+
+#from tropos.preprocess_docx.scraper1 import RubricProcessor
+
+
+#processor = RubricProcessor(root_dir='/content/project')
+
+# Run the processing
+#processor.process_student_submissions()
+
+
+##WHAT WOULD BE IN TROPOS __INIT__
+# This file marks tropos as a Python package.
+
+#from .models.gpt import generate_feedback
+#from .models.trained import load_model
+
+#from .preprocess_docx.rubric import parse_rubric
+#from .preprocess_docx.submission import parse_submission
+#from .preprocess_docx.assignment_requirements import parse_requirements
+#from .preprocess_docx.comments import Comments, parse_comments
+#from .preprocess_docx.scraper1 import process_student_submissions, RubricProcessor
+
+#from .preprocess_docx import StudentSubmission
+
+
+# Optional UI export
+#from .gradio.ui import launch_ui
+
+# Starts the program
+#def main():
+    # Tests the ui
+    # make_ui()
+
+    # Tests the docx data extraction
+
+    #requirements_doc = Document()
+    #requirements_doc.LoadFromFile(".data/raw/Requirements.docx")
+
+    #submission_doc = Document()
+    #submission_doc.LoadFromFile("data/raw/Student 1/Student 1 Part 1.docx")
+
+    #print("Testing StudentSubmission class")
+    #StudentSubmission(submission_doc, requirements_doc)
+
+    #StudentSubmission(submission_doc, requirements_doc)
+
+
+
+##WHAT WOULD BE IN PREPROCESS __INIT__
+#
+#from .scraper1 import RubricProcessor
+#from .submission import parse_submission, Submission
+#from .assignment_requirements import parse_requirements, AssignmentRequirements
+#from .rubric import parse_rubric, Rubric
+#from .comments import Comments
+
+# Keep your existing StudentSubmission class
+#class StudentSubmission:
+    #def __init__(self, submission_path: str, requirements_path: str) -> None:
+        #self.rubric = parse_rubric(submission_path)
+        #self.submission = parse_submission(Document(submission_path))
+        #self.comments = Comments(submission_path).parse_comments()
+        #self.assignment_requirements = parse_requirements(requirements_path)
+
+    #def to_dict(self):
+        #return {
+            #'comments': self.comments.get_results(),
+            #'rubric': self.rubric.get_criteria(),
+            #'feedback': self.rubric.get_comments(),
+            #'assignment_requirements': self.assignment_requirements.get_instructions(),
+            #'submission_text': self.submission.get_content()
+        #}
+
+# Explicitly list what should be importable
+#__all__ = [
+#    'StudentSubmission',
+#    'RubricProcessor',
+    # ... other classes/functions you want to expose ...
+#]
+    
+    # TODO: Make getters and setters
+    #
+    # TODO: Make getters and setters
+    #

@@ -1,35 +1,81 @@
+from docx import Document
 
-from .scraper1 import RubricProcessor
+from .comments import Comments
 from .submission import parse_submission, Submission
 from .assignment_requirements import parse_requirements, AssignmentRequirements
 from .rubric import parse_rubric, Rubric
-from .comments import Comments
 
-# Keep your existing StudentSubmission class
+#student submission data and requirements
+
 class StudentSubmission:
+    cached_requirements = None
+
+    rubric: Rubric
+    """
+    The rubric table at the bottom of the submission document 
+    """
+    comments: Comments
+    """
+    The inline comments 
+    """
+    requirements: AssignmentRequirements
+    """
+    The requirements file 
+    """
+    submission: Submission
+    """
+    The students written work
+    """
     def __init__(self, submission_path: str, requirements_path: str) -> None:
-        self.rubric = parse_rubric(submission_path)
-        self.submission = parse_submission(Document(submission_path))
-        self.comments = Comments(submission_path).parse_comments()
-        self.assignment_requirements = parse_requirements(requirements_path)
+      self.submission_path = submission_path
+      self.requirements_path = requirements_path
+      self.rubric = parse_rubric(submission_path)
+      self.submission = parse_submission(Document(submission_path))
+      self.comments = Comments(submission_path).parse_comments()
 
-    def to_dict(self):
-        return {
-            'comments': self.comments.get_results(),
-            'rubric': self.rubric.get_criteria(),
-            'feedback': self.rubric.get_comments(),
-            'assignment_requirements': self.assignment_requirements.get_instructions(),
-            'submission_text': self.submission.get_content()
-        }
+      # to use cache or parse if provided
+      if StudentSubmission.cached_requirements:
+        self.assignment_requirements = StudentSubmission.cached_requirements
+      elif requirements_path:
+        try:
+            doc = Document(requirements_path)
+            self.assignment_requirements = parse_requirements(doc)
+            StudentSubmission.cached_requirements = self.assignment_requirements
+        except Exception as e:
+            print(f"❌ Failed to load requirements at {requirements_path}: {e}")
+            self.assignment_requirements = None
+      else:
+        self.assignment_requirements = None
 
-# Explicitly list what should be importable
-__all__ = [
-    'StudentSubmission',
-    'RubricProcessor',
-    # ... other classes/functions you want to expose ...
-]
+    #-----------------------------------------------
+    # utility methods to use directly in prompting
+    #-----------------------------------------------
+    #returns rubric formatted as readable text for prompts
+    def get_rubric_prompt(self) -> str:
+      return self.rubric.format_for_prompt() if self.rubric else ""
     
-    # TODO: Make getters and setters
-    #
-    # TODO: Make getters and setters
-    #
+    #returns students written essay content
+    def get_submission_text(self) -> str:
+      return self.submission.get_content() if self.submission else ""
+
+    #returns inline feedback as flat string with one comment per line
+    def get_comments_text(self) -> str:
+      if not self.comments:
+         return ""
+      return "\n".join(
+        f"- {c['comment_text']} (about: '{c['commented_text']}')"
+        for c in self.comments.get_results()
+      )
+    
+    #returns assignment instructions as plain text
+    def get_requirements_text(self) -> str:
+      return self.assignment_requirements.get_instructions() if self.assignment_requirements else ""
+
+    #returns all relevant data in one dictionary (debug and export)
+    def get_all(self) -> dict:
+      return {
+        "rubric": self.get_rubric_prompt(),
+        "submission": self.get_submission_text(),
+        "comments": self.get_comments_text(),
+        "requirements": self.get_requirements_text()
+      }
