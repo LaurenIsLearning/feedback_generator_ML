@@ -1,27 +1,29 @@
-# This file marks tropos as a Python package.
+# to run feedback in console and call to notebook
 
-from .preprocess_docx.rubric import parse_rubric
-from .preprocess_docx.submission import parse_submission
-from .preprocess_docx.assignment_requirements import parse_requirements
-from .preprocess_docx.comments import Comments
-from .preprocess_docx import StudentSubmission
+from tropos.feedback_engine import run_feedback_batch
 
+# For testing from console or Colab
+def test_feedback_console(
+    prompt_type="FewShot",
+    model="gpt-4o",
+    requirements_path="./data/raw/Requirements.docx",
+    example_dir="./data/raw",
+    target_dir="./data/unmarked_raw",
+    output_dir="./data/generated_output",
+    verbose=True
+):
+    run_feedback_batch(
+        prompt_type=prompt_type,
+        model=model,
+        requirements_path=requirements_path,
+        example_dir=example_dir,
+        target_dir=target_dir,
+        output_dir=output_dir,
+        verbose=verbose
+    )
 
-# Optional UI export
-# from .gradio.ui import launch_ui
-
-# Starts the program
 def main():
-    # Tests the ui
-    # make_ui()
+    # Local dev version — fallback to default
+    test_feedback_console()
 
-    # Tests the docx data extraction
-
-    requirements_doc = Document()
-    requirements_doc.LoadFromFile(".data/raw/Requirements.docx")
-
-    submission_doc = Document()
-    submission_doc.LoadFromFile("data/raw/Student 1/Student 1 Part 1.docx")
-
-    print("Testing StudentSubmission class")
-    StudentSubmission(submission_doc, requirements_doc)
+__all__ = ["test_feedback_console", "main"]

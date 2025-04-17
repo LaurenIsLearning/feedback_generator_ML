@@ -1,42 +1,56 @@
-# dynamically loads all students and their parts for prompting examples
 
-#-----------GPT GENERATED AND UNTESTED
-#import os
-#from tropos import StudentSubmission
-#
-#def load_student_submissions(raw_dir, requirements_path, limit=None):
-#    """Load student submissions dynamically based on available folders and DOCX files."""
-#    submissions = []
-#    student_folders = sorted([
-#        f for f in os.listdir(raw_dir)
-#        if os.path.isdir(os.path.join(raw_dir, f)) and f.lower().startswith("student_")
-#    ])
-#    for student in student_folders[:limit]:  # limit can be None or integer
-#        folder = os.path.join(raw_dir, student)
-#        for fname in sorted(os.listdir(folder)):
-#            if fname.endswith(".docx") and "part" in fname.lower():  # exclude Final if desired
-#                full_path = os.path.join(folder, fname)
-#                try:
-#                    sub = StudentSubmission(full_path, requirements_path)
-#                    submissions.append(sub)
-#                except Exception as e:
-#                    print(f"Skipping {fname} due to error: {e}")
-#    return submissions
-#
-#
-#def load_targets(unmarked_raw_dir, requirements_path, limit=None):
-#    """Load target (uncommented) student submissions."""
-#    targets = []
-#    files = sorted([
-#        f for f in os.listdir(unmarked_raw_dir)
-#        if f.endswith(".docx")
-#    ])
-#    for fname in files[:limit]:
-#        try:
-#            sub = StudentSubmission(os.path.join(unmarked_raw_dir, fname), requirements_path)
-#            student_name = fname.replace("Uncommented_", "").replace(".docx", "")
-#            targets.append((student_name, sub))
-#        except Exception as e:
-#            print(f"Failed loading target {fname}: {e}")
-#    return targets
-#
+import os
+from tropos import StudentSubmission
+
+def load_all_student_examples_recursive(base_dir, requirements_path, valid_ext=".docx", verbose = False):
+    """
+    Recursively load all student submissions from a directory and its subdirectories.
+    
+    Parameters:
+    - base_dir: Root directory to begin search
+    - requirements_path: Path to the requirements file
+    - valid_ext: File extension to look for (default: .docx)
+    
+    Returns:
+    - List of StudentSubmission instances
+    """
+    submissions = []
+    for root, dirs, files in os.walk(base_dir):
+        for fname in sorted(files):
+            if not fname.lower().endswith(valid_ext):
+                full_path = os.path.join(root, fname)
+                try:
+                    sub = StudentSubmission(full_path, requirements_path)
+                    submissions.append(sub)
+                    if verbose:
+                        print(f"✅ Loaded example: {full_path}")
+                except Exception as e:
+                    print(f"❌ Failed to parse {full_path}: {e}")
+    return submissions
+
+def load_all_targets_recursive(unmarked_dir, requirements_path, valid_ext=".docx", verbose = False):
+    """
+    Recursively load all target (uncommented) student submissions.
+
+    Parameters:
+    - unmarked_dir: Root directory to search for .docx files
+    - requirements_path: Path to the assignment requirements
+    - valid_ext: File extension to load (default: .docx)
+
+    Returns:
+    - List of (student_name, StudentSubmission) tuples
+    """
+    targets = []
+    for root, dirs, files in os.walk(unmarked_dir):
+        for fname in sorted(files):
+            if fname.lower().endswith(valid_ext):
+                full_path = os.path.join(root, fname)
+                try:
+                    sub = StudentSubmission(full_path, requirements_path)
+                    student_name = os.path.splitext(fname)[0].replace("Uncommented_", "")
+                    targets.append((student_name, sub))
+                    if verbose:
+                        print(f"✅ Loaded target: {full_path}")
+                except Exception as e:
+                    print(f"❌ Failed to load target {full_path}: {e}")
+    return targets
