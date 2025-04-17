@@ -1,4 +1,5 @@
 gradio
 langchain_openai  # what is this?
 gradio_client
-openai 
+openai
+python-docx
