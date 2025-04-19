@@ -7,7 +7,7 @@ from tropos.models import gpt, gemini
 def call_model(prompt: str, model_name: str = "gpt-4o"):
     if model_name == "gpt-4o":
         return gpt.call_chatgpt(prompt)
-    elif model_name == "gemini":
+    elif model_name == "gemini-2.5-pro-exp-03-25":
         return gemini.call_gemini(prompt)
     else:
         raise ValueError(f"Unsupported model: {model_name}")
