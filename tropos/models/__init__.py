@@ -1,7 +1,7 @@
 #-------- placehold until made--------------
 from .gpt import call_chatgpt
-#from .gemini import call_gemini
-#from .model_router import call_model
+from .gemini import call_gemini
+from .model_router import call_model
 from .prompt_builder import build_prompt
 #-------------------------------
 
