@@ -7,8 +7,8 @@ from .prompt_builder import build_prompt
 
 __all__ = [
     "call_chatgpt",
-#    "call_gemini",
-#    "call_model",
+    "call_gemini",
+    "call_model",
     "build_prompt"
 ]
 #-------------------------------
