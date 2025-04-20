@@ -6,7 +6,7 @@ import time
 # Gemini API Caller
 # --------------------------
 
-def call_gemini(prompt: str, model_name="gemini-2.5-pro-exp-03-25", temperature=0.7, max_tokens=1500, retries=3) -> str:
+def call_gemini(prompt: str, model_name="gemini-1.5-pro-latest", temperature=0.7, max_tokens=1500, retries=3) -> str:
     model = genai.GenerativeModel(model_name)
     
     for attempt in range(retries):
