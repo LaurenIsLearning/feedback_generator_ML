@@ -2,8 +2,8 @@ from docx import Document
 
 from .comments import Comments
 from .submission import parse_submission, Submission
-from .assignment_requirements import parse_requirements, AssignmentRequirements
 from .rubric import parse_rubric, Rubric
+from tropos.preprocess_docx.assignment_requirements import parse_requirements, AssignmentRequirements
 
 #student submission data and requirements
 
@@ -38,8 +38,7 @@ class StudentSubmission:
         self.assignment_requirements = StudentSubmission.cached_requirements
       elif requirements_path:
         try:
-            doc = Document(requirements_path)
-            self.assignment_requirements = parse_requirements(doc)
+            self.assignment_requirements = parse_requirements(requirements_path)
             StudentSubmission.cached_requirements = self.assignment_requirements
         except Exception as e:
             print(f"❌ Failed to load requirements at {requirements_path}: {e}")
@@ -51,8 +50,11 @@ class StudentSubmission:
     # utility methods to use directly in prompting
     #-----------------------------------------------
     #returns rubric formatted as readable text for prompts
-    def get_rubric_prompt(self) -> str:
-      return self.rubric.format_for_prompt() if self.rubric else ""
+    def get_clean_rubric(self) -> str:
+      return self.rubric.format_clean_only() if self.rubric else ""
+
+    def get_rubric_feedback(self) -> str:
+      return self.rubric.format_rubric_feedback() if self.rubric else ""
     
     #returns students written essay content
     def get_submission_text(self) -> str:
