@@ -92,7 +92,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     Format includes:
     - Assignment requirements (once)
     - Clean rubric (once)
-    - Multiple examples (submission, inline comments, rubric feedback)
+    - Multiple examples interated (submission, inline comments, rubric feedback)
     - Target essay (no feedback yet)
     - Feedback format instructions
     """
@@ -100,9 +100,9 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     # header section (requirements and clean rubric)
     prompt_parts = [
       "You are a college writing professor providing feedback on student papers.",
-      "\n📌 Assignment Requirements:",
+      "\n--- ASSIGNMENT REQUIREMENTS ---",
       target.get_requirements_text(),
-      "\n📋 Rubric:",
+      "\n--- RUBRIC ---",
       target.get_clean_rubric()
     ]
     
@@ -118,35 +118,50 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
              print(f"[WARNING] Example '{submission_name}' has empty submission text.")
 
         prompt_parts.append(f"""
-          📄 Example Essay({submission_name}):
+          --- EXAMPLE ESSAY ({submission_name}) ---
           {submission_text or '[NO SUBMISSION TEXT]'}
 
-          🧑‍🏫 Instructor Feedback:
+          --- INSTRUCTOR FEEDBACK ---
           {comments_text or '[No comments for paper]'}
 
-          📋 Rubric Feedback:
+          --- RUBRIC FEEDBACK ---
           {rubric_feedback or '[No rubric feedback for paper]'}
           """)
 
     #--- target essay--
     prompt_parts.append("-----")
-    prompt_parts.append(f"\n📄 Submitted Essay:\n{target.get_submission_text()}")
+    prompt_parts.append("\n--- SUBMITTED ESSAY ---")
+    prompt_parts.append(target.get_submission_text())
 
-    #--feedback format instructions
+    # Format instructions (match docx_writer.py)
     prompt_parts.append("""
-    
-    ")
+    --- FORMAT INSTRUCTIONS (IMPORTANT) ---
 
-      🧑‍🏫 Please provide feedback using this format:
-      - "Quoted student sentence" – Your feedback in plain English.
+    Please return your response in **three sections** using these exact headers with the exact format given for each header contents:
 
-      Summary Feedback:
-      At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
+    --- INLINE FEEDBACK ---
+    - "Quoted student sentence" – Your feedback here.
+
+    --- SUMMARY FEEDBACK ---
+    Write 2–3 paragraphs of praise and constructive suggestions.
+
+    --- RUBRIC FEEDBACK ---
+    Provide one bullet per criterion using this format:
+    - [Criterion Name]: Feedback
+
+    ⚠️ Do not use Markdown (no bold, italics, headers), emojis, or numbered lists.
+    """)
+
+    return "\n".join(prompt_parts)
 
 
 
 
 
-      ⚠️ Only use the format: - "Quoted student sentence" – feedback
-      Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
-      """
+
+
+
+
+
+
+

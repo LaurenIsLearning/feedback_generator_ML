@@ -7,7 +7,23 @@ from docx.oxml import OxmlElement
 def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str):
     doc = Document(submission_path)
 
-    # Split feedback into inline and summary
+    #default fallbacks
+    inline_text = feedback_text
+    summary_text = ""
+    rubric_text = ""
+
+    # Split using exact section markers (created in prompt_builder.py)
+    if "--- RUBRIC FEEDBACK ---" in feedback_text:
+        inline_summary_part, rubric_text = feedback_text.split("--- RUBRIC FEEDBACK ---", 1)
+    else:
+        inline_summary_part = feedback_text
+
+    if "--- SUMMARY FEEDBACK ---" in inline_summary_part:
+        inline_text, summary_text = inline_summary_part.split("--- SUMMARY FEEDBACK ---", 1)
+    else:
+        inline_text = inline_summary_part
+
+
     if "Summary Feedback:" in feedback_text:
         inline_text, summary_text = feedback_text.split("Summary Feedback:", 1)
     else:
