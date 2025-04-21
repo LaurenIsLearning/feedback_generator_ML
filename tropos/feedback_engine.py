@@ -29,6 +29,7 @@ def run_feedback_batch(
 
   for student_name, target in targets:
         prompt = build_prompt(prompt_type, examples, target)
+        print(prompt)
         feedback = call_model(prompt, model_name=model)
 
         filename = os.path.splitext(os.path.basename(target.submission_path))[0]
