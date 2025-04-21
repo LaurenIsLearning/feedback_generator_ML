@@ -24,9 +24,9 @@ class Comments:
               # Look for any comments XML file (comments.xml, comments1.xml, etc.)
               comment_file = next((f for f in z.namelist()
                                    if f.startswith("word/comments") and f.endswith(".xml")), None)
-  
               if not comment_file:
-                  print(f"⚠️ No comments file found in {self.doc_path}")
+              #DEBUG (commented out bc there is files without comments and dont want that to look like an error.)
+              #    print(f"⚠️ No comments file found in {self.doc_path}")
                   return
   
               with z.open(comment_file) as f:

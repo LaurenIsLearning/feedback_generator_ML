@@ -29,7 +29,7 @@ class Rubric:
     #-----------------------
     def format_clean_only(self) -> str:
       """Returns only the ideal rubric criteria, excluding any instructor feedback."""
-      text = "Criteria:\n"
+      text = ""
       for portion in self.criteria:
           text += f"\n== {portion['portion']} ==\n"
           for crit in portion['criteria']:
@@ -38,7 +38,7 @@ class Rubric:
 
     def format_rubric_feedback(self) -> str:
       """Returns past instructor feedback per rubric section."""
-      text = "\n\n🧑‍🏫 Instructor’s Rubric Feedback:\n"
+      text = ""
       for portion in self.criteria:
             if portion["feedback"]:
                 text += f"\n== {portion['portion']} ==\n"

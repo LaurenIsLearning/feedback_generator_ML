@@ -2,8 +2,8 @@ from docx import Document
 
 from .comments import Comments
 from .submission import parse_submission, Submission
-from .assignment_requirements import parse_requirements, AssignmentRequirements
 from .rubric import parse_rubric, Rubric
+from tropos.preprocess_docx.assignment_requirements import parse_requirements, AssignmentRequirements
 
 #student submission data and requirements
 
@@ -53,7 +53,7 @@ class StudentSubmission:
     def get_clean_rubric(self) -> str:
       return self.rubric.format_clean_only() if self.rubric else ""
 
-    def get_rubric_feedback_prompt(self) -> str:
+    def get_rubric_feedback(self) -> str:
       return self.rubric.format_rubric_feedback() if self.rubric else ""
     
     #returns students written essay content

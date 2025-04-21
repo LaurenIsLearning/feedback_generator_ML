@@ -1,7 +1,7 @@
 from tropos.preprocess_docx import StudentSubmission
 import openai
 import time
-from openai import OpenAIError
+from openai import RateLimitError
 
 # --------------------------
 # ChatGPT API Caller
