@@ -69,7 +69,7 @@ def parse_rubric(doc_path: str) -> "Rubric":
 
     # Assume last table is rubric
     if not doc.tables:
-      print("No tables in document.")
+      # print("No tables in document.")
       return rubric
 
     table = doc.tables[-1]
