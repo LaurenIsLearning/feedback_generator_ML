@@ -51,7 +51,7 @@ class StudentSubmission:
     #-----------------------------------------------
     #returns rubric formatted as readable text for prompts
     def get_rubric_prompt(self) -> str:
-      return self.rubric.format_for_prompt() if self.rubric else ""
+      return self.rubric.format_clean_and_feedback() if self.rubric else ""
     
     #returns students written essay content
     def get_submission_text(self) -> str:

@@ -105,6 +105,8 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission):
       {comments_text or '[NO COMMENTS FOUND]'}
       """
 
+    print("🔍 DEBUG: Final few-shot block content:\n", few_shot_blocks[:500])
+
     return f"""
       You are a college writing professor providing feedback on student papers.
 
