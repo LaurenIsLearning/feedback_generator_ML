@@ -87,14 +87,24 @@ def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "
 
 def build_fewshot_prompt(examples: list, target: StudentSubmission):
     few_shot_blocks = ""
-    for ex in examples:
+
+    for i, ex in enumerate(examples):
+        submission_text = ex.get_submission_text()
+        comments_text = ex.get_comments_text()
+
+        if not submission_text.strip():
+            print(f"[WARNING] Example {i+1} has empty submission text.")
+        if not comments_text.strip():
+            print(f"[WARNING] Example {i+1} has empty comments.")
+
         few_shot_blocks += f"""
       📄 Example Essay:
-      {ex.get_submission_text()}
+      {submission_text or '[NO SUBMISSION TEXT]'}
 
       🧑‍🏫 Instructor Feedback:
-      {ex.get_comments_text()}
+      {comments_text or '[NO COMMENTS FOUND]'}
       """
+
     return f"""
       You are a college writing professor providing feedback on student papers.
 
@@ -118,5 +128,5 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission):
       At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
 
       ⚠️ Only use the format: - "Quoted student sentence" – feedback
-   s   Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
+      Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
       """
