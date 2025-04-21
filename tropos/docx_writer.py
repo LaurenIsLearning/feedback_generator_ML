@@ -3,8 +3,10 @@ from docx.shared import Pt, RGBColor
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
+from tropos.preprocess_docx import StudentSubmission
 
-def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str):
+
+def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str, target: StudentSubmission):
     doc = Document(submission_path)
 
     #default fallbacks
@@ -23,17 +25,8 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
     else:
         inline_text = inline_summary_part
 
-
-    if "Summary Feedback:" in feedback_text:
-        inline_text, summary_text = feedback_text.split("Summary Feedback:", 1)
-    else:
-        inline_text = feedback_text
-        summary_text = ""
-
-    # Parse inline feedback lines
+    #extract inline feedback pairs
     inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- ")]
-    
-    # Extract quote-comment pairs from lines starting with '- "quoted text"' format
     feedback_pairs = []
     for line in inline_lines:
         if '"' in line:
@@ -44,11 +37,10 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
             except IndexError:
                 continue
 
-    # Inject feedback into paragraphs
+    # inject inline feedback
     for para in doc.paragraphs:
         for quoted, comment in feedback_pairs:
             if quoted in para.text:
-                # Split the paragraph where the quote appears
                 parts = para.text.split(quoted)
                 if len(parts) >= 2:
                     para.clear()
@@ -60,13 +52,48 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
                     para.add_run(parts[1])
                 break
 
-    # Add summary section
-    doc.add_paragraph("")  # spacing
-    summary_header = doc.add_paragraph("Summary Feedback:")
-    summary_header.runs[0].bold = True
+    # add feedback summary section
+    if summary_text.strip():
+        doc.add_paragraph("")
+        header = doc.add_paragraph("Summary Feedback:")
+        header.runs[0].bold = True
+        for line in summary_text.strip().split("\n"):
+            if line.strip():
+                doc.add_paragraph(line.strip())
 
-    for line in summary_text.strip().split("\n"):
-        if line.strip():
-            doc.add_paragraph(line.strip())
+    # add rubric TABLE with feedback section
+    if rubric_text.strip() and hasattr(target, "rubric"):
+        doc.add_paragraph("")
+        header = doc.add_paragraph("Rubric Feedback:")
+        header.runs[0].bold = True
+
+        # Step 1: Parse model rubric feedback as dict
+        rubric_feedback_map = {}
+        for line in rubric_text.strip().split("\n"):
+            if ":" in line:
+                key, val = line.split(":", 1)
+                rubric_feedback_map[key.strip()] = val.strip()
+
+        # Step 2: Generate rubric table
+        rubric = target.rubric  # assume this is passed in as part of StudentSubmission
+        table = doc.add_table(rows=1, cols=3)
+        table.style = 'Table Grid'
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Project Portion"
+        hdr_cells[1].text = "Ideal Criteria"
+        hdr_cells[2].text = "Overall Feedback"
+
+        for portion in rubric.get_criteria():
+            portion_name = portion["portion"]
+            criteria_text = "\n• " + "\n• ".join(c["text"] for c in portion["criteria"])
+            feedback = rubric_feedback_map.get(portion_name, "[No feedback provided]")
+
+            row_cells = table.add_row().cells
+            row_cells[0].text = portion_name
+            row_cells[1].text = criteria_text
+            row_cells[2].text = feedback
+
+
 
     doc.save(output_path)
+
