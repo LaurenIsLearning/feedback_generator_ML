@@ -50,8 +50,11 @@ class StudentSubmission:
     # utility methods to use directly in prompting
     #-----------------------------------------------
     #returns rubric formatted as readable text for prompts
-    def get_rubric_prompt(self) -> str:
-      return self.rubric.format_clean_and_feedback() if self.rubric else ""
+    def get_clean_rubric(self) -> str:
+      return self.rubric.format_clean_only() if self.rubric else ""
+
+    def get_rubric_feedback_prompt(self) -> str:
+      return self.rubric.format_rubric_feedback() if self.rubric else ""
     
     #returns students written essay content
     def get_submission_text(self) -> str:

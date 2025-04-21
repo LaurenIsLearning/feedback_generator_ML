@@ -17,7 +17,7 @@ def load_all_student_examples_recursive(base_dir, requirements_path, valid_ext="
     submissions = []
     for root, dirs, files in os.walk(base_dir):
         for fname in sorted(files):
-            if not fname.lower().endswith(valid_ext):
+            if fname.lower().endswith(valid_ext):
                 full_path = os.path.join(root, fname)
                 try:
                     sub = StudentSubmission(full_path, requirements_path)

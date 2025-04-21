@@ -29,18 +29,19 @@ def run_feedback_batch(
 
   for student_name, target in targets:
         prompt = build_prompt(prompt_type, examples, target)
-        feedback = call_model(prompt, model_name=model)
-
-        filename = os.path.splitext(os.path.basename(target.submission_path))[0]
-        output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
-
-        write_feedback_to_docx(
-            submission_path=target.submission_path,
-            feedback_text=feedback,
-            output_path=output_path
-        )
-
-        if verbose:
-            print(f"--- {prompt_type} Feedback for {filename} ---")
-            format_feedback_blocks(feedback)
-            print(f"✅ Saved to {output_path}")
+        print(prompt)
+#        feedback = call_model(prompt, model_name=model)
+#
+#        filename = os.path.splitext(os.path.basename(target.submission_path))[0]
+#        output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
+#
+#        write_feedback_to_docx(
+#            submission_path=target.submission_path,
+#            feedback_text=feedback,
+#            output_path=output_path
+#        )
+#
+#        if verbose:
+#            print(f"--- {prompt_type} Feedback for {filename} ---")
+#            format_feedback_blocks(feedback)
+#            print(f"✅ Saved to {output_path}")

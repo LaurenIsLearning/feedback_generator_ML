@@ -114,7 +114,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission):
       {target.get_requirements_text()}
 
       📋 Rubric:
-      {target.rubric.format_clean_and_feedback()}
+      {target.get_rubric_prompt()}
 
       {few_shot_blocks}
 
