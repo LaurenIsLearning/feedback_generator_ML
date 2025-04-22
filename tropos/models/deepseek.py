@@ -27,7 +27,7 @@ class DeepSeekClient:
                 return response.choices[0].message.content
             except Exception as e:
                 wait = 2 ** attempt
-                print(f"Attempt {attempt + 1} failed. Waiting {wait} seconds...")
+                print(f"⚠️ Rate limit hit. Waiting {wait} seconds before retrying...")
                 time.sleep(wait)
         raise RuntimeError("API request failed after 3 attempts")
 
