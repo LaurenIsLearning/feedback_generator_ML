@@ -57,24 +57,24 @@ os.environ["OPENAI_API_KEY"] = openai_key
   - TODO: create runnable feedback program for Gradio/UI when that time comes
 """
 
-# from utils.debug_helpers import explore_examples
-# # to see what is all being assigned to prompt when cycled.
-#
-# explore_examples(
-#     requirements_path="/content/project/data/raw/Requirements.docx",
-#     example_dir="/content/project/data/raw/Students_Submissions"
-# )
+from utils.debug_helpers import explore_examples
+ # to see what is all being assigned to prompt when cycled.
+
+ explore_examples(
+     requirements_path="/content/project/data/raw/Requirements.docx",
+     example_dir="/content/project/data/raw/Student_Submissions"
+ )
 
 from tropos import run_feedback_batch
 
 #change parameters here for prompt/model/max_examples
 run_feedback_batch(
     prompt_type="FewShot",
-    model="gpt-4o",
+    model="gpt-4o", #change models here
     requirements_path="./data/raw/Requirements.docx",
     example_dir="./data/raw/Student_Submissions",
     target_dir="./data/unmarked_raw",
     output_dir="./data/generated_output",
     verbose=True, #move to 'False' if you dont want all the output to be visble
-    max_examples=4 #change this for RateLimitErrors
+    max_examples=4 #change this for RateLimitErrors ('None' to allow for all)
 )
