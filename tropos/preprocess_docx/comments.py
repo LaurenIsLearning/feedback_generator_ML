@@ -69,6 +69,8 @@ class Comments:
         return [{
             'comment_id': c['id'],
             'comment_text': c['text'],
+           #DEBUG, ADDING FOLLOWING LINE
+           # 'commented_text': self.comment_refs.get(c['id'], {}).get('text') or self.comment_refs.get(c['id'], {}).get('paragraph', ''),
             'commented_text': self.comment_refs.get(c['id'], {}).get('text', ''),
             'paragraph': self.comment_refs.get(c['id'], {}).get('paragraph', ''),
             'author': c['author'],

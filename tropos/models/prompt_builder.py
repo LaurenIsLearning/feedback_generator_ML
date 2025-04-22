@@ -93,7 +93,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     - Assignment requirements (once)
     - Clean rubric (once)
     - Multiple examples interated (submission, inline comments, rubric feedback)
-    - Target essay (no feedback yet)
+    - Target essay (no feedback or rubric yet)
     - Feedback format instructions
     """
     
@@ -137,29 +137,30 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     prompt_parts.append("""
     --- FORMAT INSTRUCTIONS (IMPORTANT) ---
 
-    Please return your response in **three sections** using these exact headers with the exact format given for each header contents:
+    Please return your response in THREE SECTIONS using these exact headers and formats:
 
     --- INLINE FEEDBACK ---
+    Provide **at least 4 but no more than 8** comments using this format:
     - "Quoted student sentence" – Your feedback here.
+
+    Focus your inline feedback on moments where:
+    - A sentence could be clarified or rewritten
+    - Tone, evidence, or phrasing need revision
+    - Claims are unsupported or overly strong
 
     --- SUMMARY FEEDBACK ---
     Write 2–3 paragraphs of praise and constructive suggestions.
 
+    
     --- RUBRIC FEEDBACK ---
-    Provide one bullet per project portion using these exact project portion names:
-    - Introduction
-    - Background
-    - Analysis
-    - Response
+    Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
 
-    Format:
-    - [Project Portion]: [Your feedback]
+    Rubric Format:
+    == [Project Portion] ==
+    - Feedback comment 1
+    - Feedback comment 2
 
-    Example:
-    - Background: The section is well-researched but could include more neutral sources.
-
-
-    ⚠️ Do not use Markdown (no bold, italics, headers), emojis, or numbered lists.
+    Do NOT use Markdown (no bold, italics, headers), emojis, or numbered lists.
     """)
 
     return "\n".join(prompt_parts)
