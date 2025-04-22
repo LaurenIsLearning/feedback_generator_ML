@@ -8,13 +8,16 @@ import traceback
 
 #Core feedback generation logic
 #making fewshot and gpt-4o as default for now (its best so far)
+#THIS IS DEFAULT, DONT CHANGE THIS PLS TY <3
+#change in notebook or wherever you call it with your own parameters
 def run_feedback_batch(
   prompt_type="FewShot",
   model="gpt-4o", requirements_path=None,
   example_dir=None,
   target_dir=None,
   output_dir="./data/generated_output",
-  verbose = False #True will allow to print to console for testing
+  verbose = False, #True will allow to print to console for testing
+  max_examples=None #change this WHEN CALLED to tinker with # of examples
 ):
 
   #fall back to internal project paths
@@ -26,7 +29,10 @@ def run_feedback_batch(
         os.makedirs(output_dir)
 
   examples = load_all_student_examples_recursive(example_dir, requirements_path)
-  print(f"📦 Total examples loaded: {len(examples)}")
+  if max_examples:
+    examples = examples[:max_examples]
+  #DEBUG
+  #print(f"📦 Total examples loaded: {len(examples)}")
   if not examples:
     raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
 

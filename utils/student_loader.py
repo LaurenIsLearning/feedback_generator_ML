@@ -18,7 +18,7 @@ def load_all_student_examples_recursive(base_dir, requirements_path, valid_ext="
     for root, dirs, files in os.walk(base_dir):
         for fname in sorted(files):
           #DEBUG
-          print(f"🔍 Scanning file: {os.path.join(root, fname)}")
+          #print(f"🔍 Scanning file: {os.path.join(root, fname)}")
           if fname.lower().endswith(valid_ext):
                 full_path = os.path.join(root, fname)
                 try:
