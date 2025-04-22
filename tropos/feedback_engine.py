@@ -4,6 +4,7 @@ from utils.student_loader import load_all_student_examples_recursive, load_all_t
 from tropos.docx_writer import write_feedback_to_docx
 from utils.feedback_formatting import format_feedback_blocks
 import os
+import traceback
 
 #Core feedback generation logic
 #making fewshot and gpt-4o as default for now (its best so far)
@@ -25,9 +26,24 @@ def run_feedback_batch(
         os.makedirs(output_dir)
 
   examples = load_all_student_examples_recursive(example_dir, requirements_path)
+  print(f"📦 Total examples loaded: {len(examples)}")
+  if not examples:
+    raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
+
   targets = load_all_targets_recursive(target_dir, requirements_path)
+  if not targets:
+    raise ValueError(f"❌ No target submissions found in {target_dir}.")
+
+  shared_rubric = examples[0].rubric  # now safe to use!
+
+
+#  examples = load_all_student_examples_recursive(example_dir, requirements_path)
+#  targets = load_all_targets_recursive(target_dir, requirements_path)
+#
+#  shared_rubric = examples[0].rubric # assumes at least one example with a good rubric
 
   for student_name, target in targets:
+        target.rubric = shared_rubric 
         prompt = build_prompt(prompt_type, examples, target)
         print(prompt)
         feedback = call_model(prompt, model_name=model)
@@ -35,10 +51,14 @@ def run_feedback_batch(
         filename = os.path.splitext(os.path.basename(target.submission_path))[0]
         output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
 
+        #DEBUG
+        print("🧪 RUBRIC PORTIONS:", [p["portion"] for p in target.rubric.get_criteria()])
+
         write_feedback_to_docx(
             submission_path=target.submission_path,
             feedback_text=feedback,
-            output_path=output_path
+            output_path=output_path,
+            target = target #this is the full StudentSubmission class info parsed
         )
 
         if verbose:

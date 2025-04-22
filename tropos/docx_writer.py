@@ -1,10 +1,11 @@
 from docx import Document
-from docx.shared import Pt, RGBColor
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
 
 from tropos.preprocess_docx import StudentSubmission
 
+#---- for future highlight implementation---
+#from docx.shared import Pt, RGBColor
+#from docx.oxml.ns import qn
+#from docx.oxml import OxmlElement
 
 def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str, target: StudentSubmission):
     doc = Document(submission_path)
@@ -61,13 +62,13 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
             if line.strip():
                 doc.add_paragraph(line.strip())
 
-    # add rubric TABLE with feedback section
+    # add rubric TABLE with feedback injected
     if rubric_text.strip() and hasattr(target, "rubric"):
         doc.add_paragraph("")
-        header = doc.add_paragraph("Rubric Feedback:")
-        header.runs[0].bold = True
+        rubric_header = doc.add_paragraph("Rubric Feedback:")
+        rubric_header.runs[0].bold = True
 
-        # Step 1: Parse model rubric feedback as dict
+        # Step 1: Convert parse model rubric feedback as dict
         rubric_feedback_map = {}
         for line in rubric_text.strip().split("\n"):
             if ":" in line:
@@ -77,7 +78,7 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
         # Step 2: Generate rubric table
         rubric = target.rubric  # assume this is passed in as part of StudentSubmission
         table = doc.add_table(rows=1, cols=3)
-        table.style = 'Table Grid'
+        # table.style = 'Table Grid'
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = "Project Portion"
         hdr_cells[1].text = "Ideal Criteria"
@@ -93,7 +94,4 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
             row_cells[1].text = criteria_text
             row_cells[2].text = feedback
 
-
-
     doc.save(output_path)
-

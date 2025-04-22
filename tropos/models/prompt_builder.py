@@ -146,8 +146,18 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     Write 2–3 paragraphs of praise and constructive suggestions.
 
     --- RUBRIC FEEDBACK ---
-    Provide one bullet per criterion using this format:
-    - [Criterion Name]: Feedback
+    Provide one bullet per project portion using these exact project portion names:
+    - Introduction
+    - Background
+    - Analysis
+    - Response
+
+    Format:
+    - [Project Portion]: [Your feedback]
+
+    Example:
+    - Background: The section is well-researched but could include more neutral sources.
+
 
     ⚠️ Do not use Markdown (no bold, italics, headers), emojis, or numbered lists.
     """)
