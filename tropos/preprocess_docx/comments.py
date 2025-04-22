@@ -18,27 +18,39 @@ class Comments:
         return self
 
     def _extract_comment_content(self):
-        """Extract comment content from the docx archive"""
-        try:
-            with zipfile.ZipFile(self.doc_path) as z:
-                with z.open('word/comments.xml') as f:
-                    comments_xml = parse_xml(f.read())
-                    namespace = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
-                    for comment in comments_xml.xpath('//w:comment', namespaces=namespace):
-                        self.comments.append({
-                            'id': comment.get(qn('w:id')),
-                            'author': comment.get(qn('w:author'), 'Unknown'),
-                            'date': comment.get(qn('w:date'), ''),
-                            'text': ''.join([
-                                node.text for node in 
-                                comment.xpath('.//w:t', namespaces=namespace) 
-                                if node.text
-                            ]).strip()
-                        })
-        except KeyError:
-            print("Document contains no comments")
-        except Exception as e:
-            print(f"Error reading comments: {e}")
+      """Extract comment content from the docx archive"""
+      try:
+          with zipfile.ZipFile(self.doc_path) as z:
+              # Look for any comments XML file (comments.xml, comments1.xml, etc.)
+              comment_file = next((f for f in z.namelist()
+                                   if f.startswith("word/comments") and f.endswith(".xml")), None)
+              if not comment_file:
+              #DEBUG (commented out bc there is files without comments and dont want that to look like an error.)
+              #    print(f"⚠️ No comments file found in {self.doc_path}")
+                  return
+  
+              with z.open(comment_file) as f:
+                  comments_xml = parse_xml(f.read())
+                  namespace = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+  
+                  for comment in comments_xml.xpath('//w:comment', namespaces=namespace):
+                      self.comments.append({
+                          'id': comment.get(qn('w:id')),
+                          'author': comment.get(qn('w:author'), 'Unknown'),
+                          'date': comment.get(qn('w:date'), ''),
+                          'text': ''.join([
+                              node.text for node in 
+                              comment.xpath('.//w:t', namespaces=namespace) 
+                              if node.text
+                          ]).strip()
+                      })
+  
+          if not self.comments:
+              print(f"⚠️ No comments extracted from {self.doc_path}")
+  
+      except Exception as e:
+          print(f"❌ Error reading comments from {self.doc_path}: {e}")
+
 
     def _find_comment_references(self):
         """Find comment references in document text"""
@@ -57,6 +69,8 @@ class Comments:
         return [{
             'comment_id': c['id'],
             'comment_text': c['text'],
+           #DEBUG, ADDING FOLLOWING LINE
+           # 'commented_text': self.comment_refs.get(c['id'], {}).get('text') or self.comment_refs.get(c['id'], {}).get('paragraph', ''),
             'commented_text': self.comment_refs.get(c['id'], {}).get('text', ''),
             'paragraph': self.comment_refs.get(c['id'], {}).get('paragraph', ''),
             'author': c['author'],

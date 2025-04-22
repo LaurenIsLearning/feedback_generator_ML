@@ -24,6 +24,68 @@ class Rubric:
     def get_comments(self):
         return self.comments
 
+    #-----------------------
+    # Formatting for prompt
+    #-----------------------
+    def format_clean_only(self) -> str:
+      """Returns only the ideal rubric criteria, excluding any instructor feedback."""
+      text = ""
+      for portion in self.criteria:
+          text += f"\n== {portion['portion']} ==\n"
+          for crit in portion['criteria']:
+              text += f"- {crit['text']}\n"
+      return text.strip()
+
+    def format_rubric_feedback(self) -> str:
+      """Returns past instructor feedback per rubric section."""
+      text = ""
+      for portion in self.criteria:
+            if portion["feedback"]:
+                text += f"\n== {portion['portion']} ==\n"
+                for fb in portion["feedback"]:
+                    text += f"- {fb['text']}\n"
+      return text.strip()
+
+    def format_clean_and_feedback(self) -> str:
+        """Returns a rubric formatted with ideal criteria AND past instructor feedback per section."""
+        text = self.format_clean_only()
+        text += self.format_rubric_feedback()
+        return text.strip()
+
+    def inject_model_feedback(self, model_text: str):
+      """
+      Parses GPT-style rubric feedback and injects it into self.criteria.
+      Expected format:
+      == Section Name ==
+      - Feedback comment
+      - Feedback comment
+      """
+      import re
+      from collections import defaultdict
+  
+      rubric_feedback_map = defaultdict(list)
+      current_section = None
+  
+      for line in model_text.strip().split("\n"):
+          section_match = re.match(r"==\s*(.*?)\s*==", line)
+          comment_match = re.match(r"-\s+(.*)", line)
+  
+          if section_match:
+              current_section = section_match.group(1).strip()
+          elif comment_match and current_section:
+              rubric_feedback_map[current_section].append(comment_match.group(1).strip())
+  
+      for section in self.criteria:
+          name = section["portion"]
+          if name in rubric_feedback_map:
+              section["feedback"] = [
+                  {"id": f"{name.lower().replace(' ', '_')}_m{i+1}", "text": comment}
+                  for i, comment in enumerate(rubric_feedback_map[name])
+              ]
+  
+
+
+
 # --------------------------
 # Extracts highlighted text from a cell (ideal criteria column)
 # TODO: implement later
@@ -39,7 +101,7 @@ def parse_rubric(doc_path: str) -> "Rubric":
 
     # Assume last table is rubric
     if not doc.tables:
-      print("No tables in document.")
+      # print("No tables in document.")
       return rubric
 
     table = doc.tables[-1]
