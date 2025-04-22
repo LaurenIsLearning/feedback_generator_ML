@@ -42,7 +42,7 @@ def run_feedback_batch(
 
   shared_rubric = examples[0].rubric  # now safe to use!
 
-# ERASE?
+
 #  examples = load_all_student_examples_recursive(example_dir, requirements_path)
 #  targets = load_all_targets_recursive(target_dir, requirements_path)
 #
@@ -51,38 +51,32 @@ def run_feedback_batch(
   for student_name, target in targets:
         target.rubric = shared_rubric 
         prompt = build_prompt(prompt_type, examples, target)
+        #print(prompt)
         #DEBUG
-        #!!! print(f"\n📜 Prompt for {student_name}:\n{'-'*60}\n{prompt[:3000]}...\n{'-'*60}\n")
+        # Optional: print prompt
+        print(f"\n📜 Prompt for {student_name}:\n{'-'*60}\n{prompt[:1500]}...\n{'-'*60}\n")
 
         feedback = call_model(prompt, model_name=model)
 
         #DEBUG
-        #print(f"\n🧠 GPT Feedback for {student_name}\n{'='*60}")
-        #format_feedback_blocks(feedback)
-        #print("="*60 + "\n")
+        print(f"\n🧠 GPT Feedback for {student_name}\n{'='*60}")
+        format_feedback_blocks(feedback)
+        print("="*60 + "\n")
 
-        #DEBUG
-        # print("🧪 RUBRIC PORTIONS:", [p["portion"] for p in target.rubric.get_criteria()])
-
-        # Extract rubric feedback and inject it into target rubric
-        if "--- RUBRIC FEEDBACK ---" in feedback:
-            try:
-                _, rubric_text = feedback.split("--- RUBRIC FEEDBACK ---", 1)
-                target.rubric.inject_model_feedback(rubric_text)
-            except Exception as e:
-                print(f"⚠️ Could not inject rubric feedback for {student_name}: {e}")
-        
-        filename = os.path.splitext(os.path.basename(target.submission_path))[0]
-        output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
-
-        write_feedback_to_docx(
-            submission_path=target.submission_path,
-            feedback_text=feedback,
-            output_path=output_path,
-            target = target #this is the full StudentSubmission class info parsed
-        )
-
-        if verbose:
-            print(f"--- {prompt_type} Feedback for {filename} ---")
-            format_feedback_blocks(feedback)
-            print(f"✅ Saved to {output_path}")
+#        filename = os.path.splitext(os.path.basename(target.submission_path))[0]
+#        output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
+#
+#        #DEBUG
+#        # print("🧪 RUBRIC PORTIONS:", [p["portion"] for p in target.rubric.get_criteria()])
+#
+#        write_feedback_to_docx(
+#            submission_path=target.submission_path,
+#            feedback_text=feedback,
+#            output_path=output_path,
+#            target = target #this is the full StudentSubmission class info parsed
+#        )
+#
+#        if verbose:
+#            print(f"--- {prompt_type} Feedback for {filename} ---")
+#            format_feedback_blocks(feedback)
+#            print(f"✅ Saved to {output_path}")
