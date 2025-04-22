@@ -139,8 +139,8 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
 
     Please return your response in THREE SECTIONS using these exact headers and formats:
 
-    --- INLINE FEEDBACK ---
-    Provide **at least 4 but no more than 8** comments using this format:
+    --- INLINE FEEDBACK (REQUIRED) ---
+    (REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
     - "Quoted student sentence" – Your feedback here.
 
     Focus your inline feedback on moments where:
