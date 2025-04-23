@@ -1,7 +1,7 @@
 import gradio as gr
 
 with gr.Blocks() as demo:
-    gr.Markdown("### 📝 Feedback Tool UI (Visual Only)")
+    gr.Markdown("### Tropos - Feedback Generator")
 
     with gr.Row():
         # LEFT COLUMN 
