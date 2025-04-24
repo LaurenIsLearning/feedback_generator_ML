@@ -1,20 +1,52 @@
+from typing import TypedDict
 from docx import Document
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.oxml import parse_xml
 from docx.oxml.ns import qn
 import zipfile
+from typing import List
+
+
+class CommentInfo(TypedDict):
+    """
+    All of the info related to a comment
+    """
+
+    comment_id: str
+    comment_text: str
+    commented_text: str
+    paragraph: str
+    author: str
+    data: str
+
 
 class Comments:
+
+    results: List[CommentInfo]
+
     def __init__(self, doc_path):
         self.doc_path = doc_path
         self.doc = Document(doc_path)
         self.comments = []
         self.comment_refs = {}
+        self.results = []
 
     def parse_comments(self):
         """Main method to extract all comments and their context"""
         self._extract_comment_content()
         self._find_comment_references()
+        # Compiles information based on the comments and their references
+        self.results = [
+            {
+                "comment_id": c["id"],
+                "comment_text": c["text"],
+                "commented_text": self.comment_refs.get(c["id"], {}).get("text", ""),
+                "paragraph": self.comment_refs.get(c["id"], {}).get("paragraph", ""),
+                "author": c["author"],
+                "date": c["date"],
+            }
+            for c in self.comments
+        ]
         return self
 
     def _extract_comment_content(self):
@@ -56,15 +88,17 @@ class Comments:
         """Find comment references in document text"""
         for paragraph in self.doc.paragraphs:
             for run in paragraph.runs:
-                if hasattr(run, '_element'):
-                    if comment_refs := run._element.xpath('.//w:commentReference'):
-                        comment_id = comment_refs[0].get(qn('w:id'))
+                if hasattr(run, "_element"):
+                    if comment_refs := run._element.xpath(".//w:commentReference"):
+                        comment_id = comment_refs[0].get(qn("w:id"))
                         self.comment_refs[comment_id] = {
-                            'text': run.text.strip(),
-                            'paragraph': paragraph.text.strip()
+                            "text": run.text.strip(),
+                            "paragraph": paragraph.text.strip(),
                         }
 
-    def get_results(self):
+    def get_results(
+        self,
+    ) -> List[CommentInfo]:
         """Return structured comment data"""
         return [{
             'comment_id': c['id'],
