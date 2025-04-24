@@ -73,7 +73,8 @@ def run_feedback_batch(
                 print(f"⚠️ Could not inject rubric feedback for {student_name}: {e}")
         
         filename = os.path.splitext(os.path.basename(target.submission_path))[0]
-        output_path = os.path.join(output_dir, f"{filename}_{model}.docx")
+        safe_model_name = model.replace("/", "_")
+        output_path = os.path.join(output_dir, f"{filename}_{safe_model_name}.docx")
 
         write_feedback_to_docx(
             submission_path=target.submission_path,
