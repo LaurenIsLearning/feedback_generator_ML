@@ -12,7 +12,8 @@ import traceback
 #change in notebook or wherever you call it with your own parameters
 def run_feedback_batch(
   prompt_type="FewShot",
-  model="gpt-4o", requirements_path=None,
+  model="gpt-4o", 
+  requirements_path=None,
   example_dir=None,
   target_dir=None,
   output_dir="./data/generated_output",
