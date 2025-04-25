@@ -10,6 +10,8 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
         return build_oneshot_prompt(examples[0], target)
     elif prompt_type == "FewShot":
         return build_fewshot_prompt(examples, target)
+    elif prompt_type == "FewShot-Llama":
+        return build_llama_prompt(examples, target)
     else:
         raise ValueError(f"Unknown prompt type: {prompt_type}")
 
@@ -164,6 +166,77 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     """)
 
     return "\n".join(prompt_parts)
+
+def build_llama_prompt(examples: list, target: StudentSubmission) -> str:
+    """
+    Builds a few-shot prompt specifically formatted for LLaMA-style models.
+
+    Format:
+    - Assignment requirements
+    - Clean rubric
+    - Multiple few-shot examples with submission, inline comments, and rubric feedback
+    - Target essay
+    - Clear feedback format instructions
+    """
+    prompt_parts = [
+        "You are a college writing professor providing feedback on student papers.",
+        "--- ASSIGNMENT REQUIREMENTS ---",
+        target.get_requirements_text() or "[NO REQUIREMENTS PROVIDED]",
+        "--- RUBRIC ---",
+        target.get_clean_rubric() or "[NO RUBRIC PROVIDED]",
+        "You will now see several examples of instructor feedback before you are asked to respond to a new submission."
+    ]
+
+    for ex in examples:
+        submission_name = os.path.basename(ex.submission_path).replace(".docx", "")
+        submission_text = ex.get_submission_text() or "[NO SUBMISSION TEXT]"
+        comments_text = ex.get_comments_text() or "[No comments for paper]"
+        rubric_feedback = ex.get_rubric_feedback() or "[No rubric feedback for paper]"
+
+        prompt_parts.append(f"""--- EXAMPLE ESSAY ({submission_name}) ---
+{submission_text}
+
+--- INSTRUCTOR FEEDBACK ---
+{comments_text}
+
+--- RUBRIC FEEDBACK ---
+{rubric_feedback}
+""")
+
+    prompt_parts.append("--- SUBMITTED ESSAY ---")
+    prompt_parts.append(target.get_submission_text() or "[NO SUBMISSION TEXT]")
+
+    # Feedback format instructions (LLaMA-friendly, no markdown, no emojis)
+    prompt_parts.append("""--- FORMAT INSTRUCTIONS (IMPORTANT) ---
+
+Please return your response in THREE SECTIONS using these exact headers and formats:
+
+--- INLINE FEEDBACK (REQUIRED) ---
+(REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
+- "Quoted student sentence" – Your feedback here.
+
+Focus your inline feedback on:
+- Sentence clarity or rewriting
+- Tone, evidence, or phrasing issues
+- Claims that are unsupported or too strong
+
+--- SUMMARY FEEDBACK ---
+Write 2–3 paragraphs of praise and constructive suggestions.
+
+--- RUBRIC FEEDBACK ---
+Only include rubric sections where you have specific praise or concerns.
+Limit to 1–2 project portions. Format:
+
+== [Project Portion] ==
+- Feedback comment 1
+- Feedback comment 2
+
+Do NOT use Markdown, bold, italics, emojis, or numbered lists.
+""")
+
+    return "\n\n".join(part.strip() for part in prompt_parts)
+
+
 
 
 

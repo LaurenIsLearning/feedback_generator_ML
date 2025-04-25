@@ -10,7 +10,7 @@ def test_feedback_console(
     example_dir="./data/raw",
     target_dir="./data/unmarked_raw",
     output_dir="./data/generated_output",
-    verbose=True
+    verbose=True,
     max_examples=None
 ):
     run_feedback_batch(
