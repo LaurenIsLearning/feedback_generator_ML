@@ -4,6 +4,7 @@ from docx import Document
 from .comments import Comments
 from .submission import parse_submission, Submission
 from .rubric import parse_rubric, Rubric
+from .assignment_requirements import AssignmentRequirements, parse_requirements
 
 # student submission data and requirements
 
@@ -39,18 +40,16 @@ class StudentSubmission:
         self.comments = Comments(submission_path).parse_comments()
 
         # NOTE: This is not likely the best way to accomplish this, rather it is what it is right now
-
         if isinstance(requirements, str):
-
             self.assignment_requirements = parse_requirements(requirements)
             return
         if isinstance(requirements, AssignmentRequirements):
-
             self.assignment_requirements = requirements
             return
+
         # Input validation just in case there is an issue
         raise RuntimeError(
-            f'❌ Failed to load requirements as the type does not match "str" or "AssignmentRequirements", found: {err}'
+            f'❌ Failed to load requirements as the type does not match "str" or "AssignmentRequirements", found: {requirements}'
         )
 
     # -----------------------------------------------
@@ -58,7 +57,7 @@ class StudentSubmission:
     # -----------------------------------------------
     # returns rubric formatted as readable text for prompts
     def get_clean_rubric(self) -> str:
-      return self.rubric.format_clean_only() if self.rubric else ""
+        return self.rubric.format_clean_only() if self.rubric else ""
 
     def get_rubric_feedback(self) -> str:
         return self.rubric.format_rubric_feedback() if self.rubric else ""
@@ -87,7 +86,7 @@ class StudentSubmission:
     # returns all relevant data in one dictionary (debug and export)
     def get_all(self) -> dict:
         return {
-            "rubric": self.get_rubric_prompt(),
+            "rubric": self.get_clean_rubric(),
             "submission": self.get_submission_text(),
             "comments": self.get_comments_text(),
             "requirements": self.get_requirements_text(),
