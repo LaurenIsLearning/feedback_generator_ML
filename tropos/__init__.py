@@ -1,6 +1,8 @@
 # to run feedback in console and call to notebook
 
 from tropos.feedback_engine import run_feedback_batch
+from tropos.models import gpt, gemini, deepseek, llama, claude
+
 
 # For testing from console or Colab
 def test_feedback_console(
