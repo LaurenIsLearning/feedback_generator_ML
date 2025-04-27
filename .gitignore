@@ -2,3 +2,8 @@
 
 # Ignore notebook checkpoints and temp files
 .ipynb_checkpoints/
+output
+model
+unsloth_compiled_cache
+__pycache__/__main__.cpython-313.pyc
+.vscode/settings.json

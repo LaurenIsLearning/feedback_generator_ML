@@ -132,16 +132,14 @@ def gradio_llama_demo():
     )
 
     with gr.Blocks(
-        css="""
-.markdown-box {
+        css=""".markdown-box {
     border: 1px solid #aaa;
     padding: 12px;
     border-radius: 6px;
     background-color:  #52525b;
     display: block;
     margin: 10px 0;
-}
-"""
+}"""
     ) as demo:
 
         gr.Markdown(
