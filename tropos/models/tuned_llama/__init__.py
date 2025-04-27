@@ -1,55 +1,30 @@
 # Unsloth should be imported first
-from math import floor
 import unsloth
 
 # Saving model
 import os
+from math import floor
 from typing import Any, TypedDict, List
-import warnings
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from seaborn.palettes import mpl_palette
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
+
 from trl import SFTTrainer
-from transformers import TrainingArguments, TextStreamer
-from unsloth.chat_templates import get_chat_template
+from transformers import TrainingArguments
 from unsloth import FastLanguageModel
 from datasets import Dataset
 from unsloth import is_bfloat16_supported
-import pandas as pd
-
 from pandas import DataFrame
 
 from tropos.preprocess_docx import StudentSubmission
 from tropos.preprocess_docx.comments import CommentInfo
 
 
-def filter_data(data: DataFrame) -> DataFrame:
-    #
-    # INPUT_LEN_FILTER = 1500
-    # OUTPUT_LEN_FILTER = 4000
-    #
-    # # Gets the len of the context for each row
-    # ln_Context = data["Context"].apply(len)
-    #
-    # # Filters based context len
-    # filtered_data = data[ln_Context <= INPUT_LEN_FILTER]
-    # # Gets the length of the response for each row
-    # ln_Response = filtered_data["Response"].apply(len)
-    #
-    # # Filters based on response len
-    # filtered_data = filtered_data[ln_Response <= OUTPUT_LEN_FILTER]
-    #
-    return data
-
-
+# A required Unsloth config option
 os.environ["UNSLOTH_RETURN_LOGITS"] = "1"
 
 
-class ProfessorFeedback(TypedDict):
+class ProfessorFeedbackDict(TypedDict):
+    """
+    The storage format used for training the model
+    """
 
     # Context
     author: str
@@ -95,8 +70,10 @@ class ProfessorFeedback(TypedDict):
 
 
 def process_submissions(submissions: List[StudentSubmission]) -> DataFrame:
-
-    feedback_entries: List[ProfessorFeedback] = []
+    """
+    Processes a list of submissions into a pandas dataframe based on ProfessorFeedbackDict
+    """
+    feedback_entries: List[ProfessorFeedbackDict] = []
     # Process each submission
     for submission in submissions:
         rubric = submission.rubric.format_clean_and_feedback()
@@ -111,7 +88,7 @@ def process_submissions(submissions: List[StudentSubmission]) -> DataFrame:
                 continue
 
             percent_chunk = content.split(paragraph)[0]
-            feedback: ProfessorFeedback = {
+            feedback: ProfessorFeedbackDict = {
                 "highlighted_section": comment.get("commented_text"),
                 "feedback": comment.get("comment_text"),
                 "student_paragraph": paragraph,
@@ -125,7 +102,6 @@ def process_submissions(submissions: List[StudentSubmission]) -> DataFrame:
                 "percent_completed": floor((len(percent_chunk) / len(content)) * 100),
             }
             feedback_entries.append(feedback)
-        # At 100%
 
     return DataFrame(feedback_entries)
 
@@ -142,32 +118,33 @@ Use the `EVALUATION_COMPLETION_PERCENTAGE` flag to tell if you are in the start,
 {}
 ### EVALUATION:
 {}"""
-data_prompt_old = """Your name is {} and you are in charge of giving feedback to student work 
-
-### Input:
-#### Student Work Requirements:
-    {}
-#### Student Work:
-    {}
-### Response:
-#### Highlighted Section:   
-    {}
-#### Feedback: 
-    {}
-#### Rubric:
-    {} 
-    """
-#
 
 
 class ProfessorLlama:
+    """
+    A class that controls the training and prompting for feedback processing
+    """
 
-    # TODO: Add types
     tokenizer: Any
+    """
+    The tokenizer used with the model 
+    """
     model: Any
+    """ 
+    The model that is being trained on feedback 
+    """
     name: str
+    """
+    The path to the current model 
+    """
     max_seq_length: int
+    """
+    Controls the length of the prompt/response 
+    """
     use_cached_responses: bool = False
+    """
+    If the feedback from the model should be cached or not 
+    """
 
     def __init__(
         self,
@@ -222,37 +199,32 @@ class ProfessorLlama:
         """
         Formats the prompts based on the provided global data_prompt
         """
+        global data_prompt
+
+        # Extract the needed columns
         authors = examples["author"]
-        requirementss = examples["requirements"]
         student_paragraphs = examples["student_paragraph"]
-        highlighted_sections = examples["highlighted_section"]
         feedbacks = examples["feedback"]
-        rubrics = examples["rubric_response"]
         essays = examples["essay"]
         percent_progresses = examples["percent_completed"]
         texts = []
 
+        # Iterates through the dataframe and creates the prompts
         EOS_TOKEN = self.tokenizer.eos_token
         for (
             author,
             essay,
-            requirements,
             student_paragraph,
-            highlighted_section,
             feedback,
-            rubric,
             percent_progresses,
         ) in zip(
             authors,
             essays,
-            requirementss,
             student_paragraphs,
-            highlighted_sections,
             feedbacks,
-            rubrics,
             percent_progresses,
         ):
-
+            # NOTE: Not all of the information is used currently
             text = (
                 data_prompt.format(
                     # Adding the author is similar to adding a ruler to a
@@ -260,12 +232,9 @@ class ProfessorLlama:
                     # so there is a greater bias for a specific author
                     author,
                     essay,
-                    # requirements,
                     student_paragraph,
                     percent_progresses,
-                    # highlighted_section,
                     feedback,
-                    # rubric,
                 )
                 + EOS_TOKEN
             )
@@ -277,23 +246,18 @@ class ProfessorLlama:
 
     def train_llama(self, data: DataFrame):
         """
-        Filters the data and trains the model with the data.
+        Trains the model with the inputted data.
         """
-        # Filter data
-        filtered_data = filter_data(data)
 
-        training_data = Dataset.from_pandas(filtered_data)
+        # Get training data
+        training_data = Dataset.from_pandas(data)
+
         # Maps the prompts to text
         training_data = training_data.map(self.formatting_prompt, batched=True)
 
         trainer = SFTTrainer(
             model=self.model,
-            # tokenizer=tokenizer,
             train_dataset=training_data,
-            # dataset_text_field="text",
-            # max_seq_length=max_seq_length,
-            # dataset_num_proc=2,
-            # packing=True,
             args=TrainingArguments(
                 learning_rate=3e-4,
                 lr_scheduler_type="linear",
@@ -310,22 +274,30 @@ class ProfessorLlama:
                 seed=37,
             ),
         )
+
         # Trains the model based on the information above
         trainer.train()
 
     def save_model(self):
+        """
+        Saves the model to disk
+        """
         self.model.save_pretrained(self.model_name)
         self.tokenizer.save_pretrained(self.model_name)
 
-    def get_feedback(self, author: str, paragraph: str, text: str):
-
+    def get_feedback(self, author: str, paragraph: str, essay: str):
+        """
+        Gets feedback based on the trained model
+        """
         self.model = FastLanguageModel.for_inference(self.model)
 
-        # TODO: Make sure this is consistent with the training prompt
+        # This splits the text up by the paragraph so the model has no context of the following paragraph
+        percent_chunk = essay.split(paragraph)[0]
 
-        percent_chunk = text.split(paragraph)[0]
-        percent_completed = floor((len(percent_chunk) / len(text)) * 100)
+        # How far the model is in the current essay
+        percent_completed = floor((len(percent_chunk) / len(essay)) * 100)
 
+        # Makes the prompt and tokenizes the
         inputs = self.tokenizer(
             [
                 data_prompt.format(
@@ -344,16 +316,15 @@ class ProfessorLlama:
         ).to("cuda")
 
         outputs = self.model.generate(
-            **inputs, max_new_tokens=5020, use_cache=self.use_cached_responses
+            **inputs,
+            max_new_tokens=self.max_seq_length,
+            use_cache=self.use_cached_responses,
         )
+
+        # Get the answer from the model
         answer = self.tokenizer.batch_decode(outputs)
         answer = answer[0].split("### EVALUATION:")[-1].replace("<|end_of_text|>", "")
         return answer
 
 
-def call_llama(prompt: str):
-    # TODO: Make this use a singleton
-    pass
-
-
-__all__ = ["call_llama"]
+__all__ = []

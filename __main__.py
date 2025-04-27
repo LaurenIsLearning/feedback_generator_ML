@@ -1,5 +1,5 @@
 # main function to test local/notebook setup
-from tropos.models.tuned_llama.demo import gradio_llama_demo, test_professor_llama
+from tropos.models.tuned_llama.demo import gradio_llama_demo, train_professor_llama
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     #     output_dir="./data/generated_output",
     #     verbose=True
     # )
-    # test_professor_llama()
+    # train_professor_llama()
     gradio_llama_demo()
 
 

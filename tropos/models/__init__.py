@@ -16,7 +16,6 @@ __all__ = [
     "call_gemini",
     "call_model",
     "call_deepseek",
-    "build_prompt"
+    "build_prompt",
 ]
 # -------------------------------
-
