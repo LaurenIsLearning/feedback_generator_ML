@@ -211,8 +211,8 @@ def build_llama_prompt(examples: list, target: StudentSubmission) -> str:
 
 Please return your response in THREE SECTIONS using these exact headers and formats:
 
---- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
-(AT LEAST 4 REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
+--- INLINE FEEDBACK ---
+Provide **at least 4 but no more than 8** comments using this format:
 - "Quoted student sentence" – Your feedback here.
 
 Focus your inline feedback on:
@@ -221,13 +221,13 @@ Focus your inline feedback on:
 - Claims that are unsupported or too strong
 
 --- SUMMARY FEEDBACK ---
-Write 2–3 paragraphs of praise and constructive suggestions.
+(REQUIRED) Write 2–3 paragraphs of praise and constructive suggestions.
 
 --- RUBRIC FEEDBACK ---
-Only include rubric sections where you have specific praise or concerns.
+(REQUIRED) Only include rubric sections where you have specific praise or concerns.
 Limit to 1–2 project portions. Format:
 
-== [Project Portion] ==
+--- [Project Portion] ---
 - Feedback comment 1
 - Feedback comment 2
 
@@ -235,7 +235,6 @@ Do NOT use Markdown, bold, italics, emojis, or numbered lists.
 """)
 
     return "\n\n".join(part.strip() for part in prompt_parts)
-
 
 
 
