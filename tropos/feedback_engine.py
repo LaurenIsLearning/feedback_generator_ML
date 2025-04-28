@@ -17,7 +17,7 @@ def run_feedback_batch(
   example_dir=None,
   target_dir=None,
   output_dir="./data/generated_output",
-  verbose = False, #True will allow to print to console for testing
+  output_mode="none", #"pretty", "raw", or "none"
   max_examples=None #change this WHEN CALLED to tinker with # of examples
 ):
 
@@ -26,14 +26,14 @@ def run_feedback_batch(
   example_dir = example_dir or "./data/raw"
   target_dir = target_dir or "./data/unmarked_raw"
 
+  #will create output_dir folder if it doesn't exist
   if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
   examples = load_all_student_examples_recursive(example_dir, requirements_path)
   if max_examples:
     examples = examples[:max_examples]
-  #DEBUG
-  #print(f"📦 Total examples loaded: {len(examples)}")
+
   if not examples:
     raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
 
@@ -43,27 +43,11 @@ def run_feedback_batch(
 
   shared_rubric = examples[0].rubric  # now safe to use!
 
-# ERASE?
-#  examples = load_all_student_examples_recursive(example_dir, requirements_path)
-#  targets = load_all_targets_recursive(target_dir, requirements_path)
-#
-#  shared_rubric = examples[0].rubric # assumes at least one example with a good rubric
 
   for student_name, target in targets:
         target.rubric = shared_rubric 
         prompt = build_prompt(prompt_type, examples, target)
-        #DEBUG
-        #!!! print(f"\n📜 Prompt for {student_name}:\n{'-'*60}\n{prompt[:3000]}...\n{'-'*60}\n")
-
         feedback = call_model(prompt, model_name=model)
-
-        #DEBUG
-        #print(f"\n🧠 GPT Feedback for {student_name}\n{'='*60}")
-        #format_feedback_blocks(feedback)
-        #print("="*60 + "\n")
-
-        #DEBUG
-        # print("🧪 RUBRIC PORTIONS:", [p["portion"] for p in target.rubric.get_criteria()])
 
         # Extract rubric feedback and inject it into target rubric
         if "--- RUBRIC FEEDBACK ---" in feedback:
@@ -84,7 +68,13 @@ def run_feedback_batch(
             target = target #this is the full StudentSubmission class info parsed
         )
 
-        if verbose:
+        #output control
+        if output_mode != "none":
             print(f"--- {prompt_type} Feedback for {filename} ---")
-            format_feedback_blocks(feedback)
+            if output_mode == "pretty":
+              format_feedback_blocks(feedback)
+            elif output_mode == "raw":
+              print(feedback)
+            else:
+              raise ValueError(f"❌ Invalid output_mode '{output_mode}'. Must be 'pretty', 'raw', or 'none'.")
             print(f"✅ Saved to {output_path}")
