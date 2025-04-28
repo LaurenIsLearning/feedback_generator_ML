@@ -1,22 +1,36 @@
-from tropos.preprocess_docx import StudentSubmission
-import google.generativeai as genai
 import time
+
+# This was renamed at some point in a newer version of the package
+try:
+    import google.generativeai as genai
+except:
+    import google.genai
+
+
+from tropos.preprocess_docx import StudentSubmission
 
 # --------------------------
 # Gemini API Caller
 # --------------------------
 
-def call_gemini(prompt: str, model_name="gemini-1.5-pro-latest", temperature=0.7, max_tokens=1500, retries=3) -> str:
+
+def call_gemini(
+    prompt: str,
+    model_name="gemini-1.5-pro-latest",
+    temperature=0.7,
+    max_tokens=1500,
+    retries=3,
+) -> str:
     model = genai.GenerativeModel(model_name)
-    
+
     for attempt in range(retries):
         try:
             response = model.generate_content(
                 prompt,
                 generation_config={
                     "temperature": temperature,
-                    "max_output_tokens": max_tokens
-                }
+                    "max_output_tokens": max_tokens,
+                },
             )
 
             # SAFER extraction
@@ -29,8 +43,9 @@ def call_gemini(prompt: str, model_name="gemini-1.5-pro-latest", temperature=0.7
                 return "[No feedback generated.]"
 
         except Exception as e:
-            wait = 2 ** attempt
+            wait = 2**attempt
             print(f"⚠️ Gemini error: {e}. Retrying in {wait} seconds...")
             time.sleep(wait)
-    
+
     raise RuntimeError("❌ Failed after multiple retries with Gemini API.")
+

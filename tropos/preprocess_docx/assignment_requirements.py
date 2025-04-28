@@ -1,17 +1,20 @@
-from docx import Document  
+from docx import Document
+
 
 class AssignmentRequirements:
+
     def __init__(self):
         self._instructions = ""
 
     def set_instructions(self, text):
         self._instructions = text
         return self
-    
-    def get_instructions(self):
+
+    def get_instructions(self) -> str:
         return self._instructions
 
-def parse_requirements(doc_path: str) -> AssignmentRequirements: 
+
+def parse_requirements(doc_path: str) -> AssignmentRequirements:
     """Original logic adapted for python-docx"""
     req = AssignmentRequirements()
     try:
@@ -22,7 +25,7 @@ def parse_requirements(doc_path: str) -> AssignmentRequirements:
             if text:
                 instructions.append(text)
         req.set_instructions("\n".join(instructions))
-        
+
     except Exception as e:
         req.set_instructions(f"Error: {str(e)}")
     return req

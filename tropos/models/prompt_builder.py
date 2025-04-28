@@ -2,6 +2,7 @@
 import os
 from tropos.preprocess_docx import StudentSubmission
 
+
 # Build prompt with below variants
 def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
     if prompt_type == "ZeroShot":
@@ -15,10 +16,12 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
     else:
         raise ValueError(f"Unknown prompt type: {prompt_type}")
 
-#---------------
+
+# ---------------
 # Prompt Variants
 # diff shots was created to show sponsor differences
-#---------------
+# ---------------
+
 
 def build_zeroshot_prompt(target: StudentSubmission):
     return f"""
@@ -43,8 +46,11 @@ def build_zeroshot_prompt(target: StudentSubmission):
     Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
     """
 
-def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "StudentSubmission"):
-    #few shot prompting
+
+def build_oneshot_prompt(
+    student_example: "StudentSubmission", student_target: "StudentSubmission"
+):
+    # few shot prompting
     rubric_text = student_example.rubric.format_clean_and_feedback()
     assignment_instructions = student_example.get_requirements_text()
     example_essay = student_example.get_submission_text()
@@ -54,7 +60,7 @@ def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "
     return f"""
     You are a college writing professor providing feedback on student papers.
   
-    Use the rubric and assignement requirements below to understand the objective expectations for the assignment.
+    Use the rubric and assignment requirements below to understand the objective expectations for the assignment.
   
     Below is an example of an assignment with a rubric, student essay, and instructor feedback. Use it as a reference to write feedback on a new student essay that follows the same assignment.   
 

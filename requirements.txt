@@ -3,3 +3,13 @@ langchain_openai  # what is this?
 gradio_client
 openai
 python-docx
+google-genai
+anthropic
+
+# Model training related packages 
+transformers
+trl
+torchvision
+torch
+unsloth
+
