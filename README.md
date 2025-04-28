@@ -18,8 +18,7 @@ Run this command in the root directory of the repository.
 
 ```tty
 python .
-```
-# help 
+``` 
 
 #### In Google Collab
 Open the `notebook.ipynb` file and run all of the cells.
