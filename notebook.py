@@ -67,7 +67,7 @@ os.environ["CLAUDE_API_KEY"] = claude_key
 import google.generativeai as genai
 genai.configure(api_key=userdata.get("gemini").strip())
 
-"""## **--Feedback Generation**"""
+"""## **--Feedback Generation Prep**"""
 
 #######################################################################
 # Ensure past generated output is cleared
@@ -86,83 +86,90 @@ examples = "./data/raw/Student_Submissions"
 targets = "./data/unmarked_raw"
 outputs = "./data/generated_output"
 
-#chatGPT
-test_feedback_console("FewShot", "gpt-4o", reqs, examples, targets, outputs,
+"""## **--Currently Running Models**"""
 
-from tropos import test_feedback_console
-#chatGPT 4.1
+# GPT-4.1
 test_feedback_console(
     prompt_type="FewShot",
     model="gpt-4.1",
-    requirements_path="./data/raw/Requirements.docx",
-    example_dir="./data/raw/Student_Submissions",
-    target_dir="./data/unmarked_raw",
-    output_dir="./data/generated_output",
-    verbose=True, #move to 'False' if you dont want all the outpu
-    max_examples=3 # Set the number of examples taken by the thingyy at once
+    requirements_path=reqs,
+    example_dir=examples,
+    target_dir=targets,
+    output_dir=outputs,
+    output_mode="raw",
+    max_examples=3
 )
 
-# from tropos import test_feedback_console
-# #deepseek
+"""## **-- Different Models** (Commented out for now)"""
+
+# # GPT-4o
+# test_feedback_console(
+#     prompt_type="FewShot",
+#     model="gpt-4o",
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
+# )
+
+# # GPT-4.1
+# test_feedback_console(
+#     prompt_type="FewShot",
+#     model="gpt-4.1",
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
+# )
+
+# # DeepSeek
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="deepseek-chat",
-#     requirements_path="./data/raw/Requirements.docx",
-#     example_dir="./data/raw/Student_Submissions",
-#     target_dir="./data/unmarked_raw",
-#     output_dir="./data/generated_output",
-#     verbose=True, #move to 'False' if you dont want all the output to be visble
-#     max_examples=3 # Set the number of examples taken by the thingyy at once
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
 # )
 
-# from tropos import test_feedback_console
-# #gemini
+# # Gemini
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="gemini-1.5-pro-latest",
-#     requirements_path="./data/raw/Requirements.docx",
-#     example_dir="./data/raw/Student_Submissions",
-#     target_dir="./data/unmarked_raw",
-#     output_dir="./data/generated_output",
-#     verbose=True, #move to 'False' if you dont want all the output to be visble
-#     max_examples=3 # Set the number of examples taken by the thingyy at once
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
 # )
 
-# from tropos import test_feedback_console
-# #LLaMA using groq, free version so smaller rate limits
+# # Llama (different prompt_type)
 # test_feedback_console(
-#     prompt_type="FewShot-Llama", #made a different prompt to get llama feedback correctly put into docx
+#     prompt_type="FewShot-Llama",
 #     model="meta-llama/llama-4-scout-17b-16e-instruct",
-#     requirements_path="./data/raw/Requirements.docx",
-#     example_dir="./data/raw/Student_Submissions",
-#     target_dir="./data/unmarked_raw",
-#     output_dir="./data/generated_output",
-#     verbose=True, #makes it so the output is printed to console too for testing purposes
-#     max_examples=3 # Set the number of examples taken by the thingyy at once
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
 # )
 
-# from tropos import test_feedback_console
 # # Claude
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="claude-3-opus-20240229",
-#     requirements_path="./data/raw/Requirements.docx",
-#     example_dir="./data/raw/Student_Submissions",
-#     target_dir="./data/unmarked_raw",
-#     output_dir="./data/generated_output",
-#     verbose=True, #makes it so the output is printed to console too for testing purposes
-#     max_examples=3 # Set the number of examples taken by the thingyy at once
+#     requirements_path=reqs,
+#     example_dir=examples,
+#     target_dir=targets,
+#     output_dir=outputs,
+#     output_mode="pretty",
+#     max_examples=3
 # )
-
-"""**--Import modules (you’re working on)**
-<br>*each of our classes will be what will merge to this notebook (I'm pretty sure)*
-<br>only loads what you explicitly request
-<br>(this helps keep memory low and import fast)
-<br> *the following is an example with my Rubric module*
-
-**--Lauren's bit that can run the feedback generator here to test**
-- ended up modularizing code to prepare for gradio/UI use.
-  - had all files include ability to use uploaded files, used local testing files as default to be able to test
-  - created feedback_engine file to be able to create runnable program in notebook to test
-  - TODO: create runnable feedback program for Gradio/UI when that time comes
-"""
