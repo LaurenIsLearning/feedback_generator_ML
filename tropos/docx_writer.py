@@ -1,79 +1,122 @@
-def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
-    """
-    Constructs a few-shot prompt for the GPT API using examples and a new student submission.
-    
-    Format includes:
-    - Assignment requirements (once)
-    - Clean rubric (once)
-    - Multiple examples interated (submission, inline comments, rubric feedback)
-    - Target essay (no feedback or rubric yet)
-    - Feedback format instructions
-    """
-    
-    # header section (requirements and clean rubric)
-    prompt_parts = [
-      "You are a college writing professor providing feedback on student papers.",
-      "\n--- ASSIGNMENT REQUIREMENTS ---",
-      target.get_requirements_text(),
-      "\n--- RUBRIC ---",
-      target.get_clean_rubric()
-    ]
-    
-    # fewshot examples
-    for ex in examples:
-        submission_name = os.path.basename(ex.submission_path).replace(".docx", "")
-        submission_text = ex.get_submission_text()
-        comments_text = ex.get_comments_text()
-        rubric_feedback = ex.get_rubric_feedback()
+from docx import Document
+from docx.shared import Inches
 
-        # Warn if any example is missing submission text
-        if not submission_text.strip():
-             print(f"[WARNING] Example '{submission_name}' has empty submission text.")
+from tropos.preprocess_docx import StudentSubmission
 
-        prompt_parts.append(f"""
-          --- EXAMPLE ESSAY ({submission_name}) ---
-          {submission_text or '[NO SUBMISSION TEXT]'}
+#---- for future highlight implementation---
+#from docx.shared import Pt, RGBColor
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
-          --- INSTRUCTOR FEEDBACK ---
-          {comments_text or '[No comments for paper]'}
+# Add table borders (python-docx doesn't show them by default)
+def set_table_border(table):
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+    tblBorders = OxmlElement('w:tblBorders')
 
-          --- RUBRIC FEEDBACK ---
-          {rubric_feedback or '[No rubric feedback for paper]'}
-          """)
+    for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        border = OxmlElement(f'w:{border_name}')
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), '4')           # Line thickness
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')     # Black
 
-    #--- target essay--
-    prompt_parts.append("-----")
-    prompt_parts.append("\n--- SUBMITTED ESSAY ---")
-    prompt_parts.append(target.get_submission_text())
+        tblBorders.append(border)
 
-    # Format instructions (match docx_writer.py)
-    prompt_parts.append("""
-    --- FORMAT INSTRUCTIONS (IMPORTANT) ---
+    tblPr.append(tblBorders)
 
-    Please return your response in THREE SECTIONS using these exact headers and formats:
+# Main writer
+def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str, target: StudentSubmission):
+    doc = Document(submission_path)
 
-    --- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
-    (AT LEAST 4 REQUIRED) Provide **at least 4 but no more than 8** comments and MUST use this format:
-    - "Quoted student sentence" - Your feedback here.
+    # Split the feedback into parts
+    inline_text = feedback_text
+    summary_text = ""
+    rubric_text = ""
 
-    Focus your inline feedback on moments where:
-    - A sentence could be clarified or rewritten
-    - Tone, evidence, or phrasing need revision
-    - Claims are unsupported or overly strong
+    if "--- RUBRIC FEEDBACK ---" in feedback_text:
+        inline_summary_part, rubric_text = feedback_text.split("--- RUBRIC FEEDBACK ---", 1)
+        # 🔁 Inject rubric feedback into target rubric object (you must have inject_model_feedback in rubric.py!)
+        if hasattr(target, "rubric") and target.rubric:
+            target.rubric.inject_model_feedback(rubric_text)
+    else:
+        inline_summary_part = feedback_text
 
-    --- SUMMARY FEEDBACK ---
-    Write 2–3 paragraphs of praise and constructive suggestions.
+    if "--- SUMMARY FEEDBACK ---" in inline_summary_part:
+        inline_text, summary_text = inline_summary_part.split("--- SUMMARY FEEDBACK ---", 1)
+    else:
+        inline_text = inline_summary_part
 
-    
-    --- RUBRIC FEEDBACK ---
-    Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
+    # Extract inline feedback pairs
+    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- ")]
+    feedback_pairs = []
+    for line in inline_lines:
+        if '"' in line:
+            try:
+                quoted = line.split('"')[1]
+                comment = line.split('"')[2].strip(" -–—:")
+                feedback_pairs.append((quoted.strip(), comment.strip()))
+            except IndexError:
+                continue
 
-    Rubric Format:
-    == [Project Portion] ==
-    - Feedback comment 1
-    - Feedback comment 2
+    # Apply inline feedback (bold for quoted, italic for comment)
+    for para in doc.paragraphs:
+        for quoted, comment in feedback_pairs:
+            if quoted in para.text:
+                parts = para.text.split(quoted)
+                if len(parts) >= 2:
+                    para.clear()
+                    para.add_run(parts[0])
+                    bold_run = para.add_run(quoted)
+                    bold_run.bold = True
+                    italic_run = para.add_run(f" [{comment}]")
+                    italic_run.italic = True
+                    para.add_run(parts[1])
+                break
 
-    Do NOT use Markdown (no bold, italics, headers), emojis, or numbered lists.
-    """)
+    # Add summary feedback
+    if summary_text.strip():
+        doc.add_paragraph("")
+        header = doc.add_paragraph("Summary Feedback:")
+        header.runs[0].bold = True
+        for line in summary_text.strip().split("\n"):
+            if line.strip():
+                doc.add_paragraph(line.strip())
 
-    return "\n".join(prompt_parts)
+    # Add rubric feedback table
+    if target.rubric:
+        doc.add_paragraph("")
+        rubric_header = doc.add_paragraph("Rubric Feedback:")
+        rubric_header.runs[0].bold = True
+
+        table = doc.add_table(rows=1, cols=3)
+        set_table_border(table)
+
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Project Portion"
+        hdr_cells[1].text = "Ideal Criteria"
+        hdr_cells[2].text = "Overall Feedback"
+
+        # Set custom widths
+        hdr_cells[0].width = Inches(1.2)  # Narrow
+        hdr_cells[1].width = Inches(2.8)  # Ideal criteria
+        hdr_cells[2].width = Inches(3.5)  # Feedback
+
+        for portion in target.rubric.get_criteria():
+
+            portion_name = portion["portion"]
+            criteria_text = "• " + "\n• ".join(c["text"] for c in portion["criteria"])
+            feedback_text = "\n".join(f"- {f['text']}" for f in portion.get("feedback", []))
+
+
+            row_cells = table.add_row().cells
+            row_cells[0].text = portion_name
+            row_cells[1].text = criteria_text
+            row_cells[2].text = feedback_text
+
+            # Set widths
+            row_cells[0].width = Inches(1.2)
+            row_cells[1].width = Inches(2.8)
+            row_cells[2].width = Inches(3.5)
+
+    doc.save(output_path)
