@@ -1,6 +1,8 @@
 # to run feedback in console and call to notebook
 
 from tropos.feedback_engine import run_feedback_batch
+from tropos.models import gpt, gemini, deepseek, llama, claude
+
 
 # For testing from console or Colab
 def test_feedback_console(
@@ -10,7 +12,8 @@ def test_feedback_console(
     example_dir="./data/raw",
     target_dir="./data/unmarked_raw",
     output_dir="./data/generated_output",
-    verbose=True
+    verbose=True,
+    max_examples=None
 ):
     run_feedback_batch(
         prompt_type=prompt_type,
@@ -19,7 +22,8 @@ def test_feedback_console(
         example_dir=example_dir,
         target_dir=target_dir,
         output_dir=output_dir,
-        verbose=verbose
+        verbose=verbose,
+        max_examples=max_examples
     )
 
 def main():
