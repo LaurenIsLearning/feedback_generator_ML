@@ -78,7 +78,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     You MUST provide at least 6 and no more than 10 pieces of inline feedback. 
     Each feedback comment MUST use this exact structure:
 
-    - QUOTE: "Student sentence here"
+    - QUOTE: Student sentence here.
       COMMENT: Feedback text here.
 
     Rules for INLINE FEEDBACK:
