@@ -33,10 +33,7 @@ class LlamaClient:
 
 _llama_client = LlamaClient()
 
-
-def call_llama(
-    prompt, model_name="meta-llama/llama-4-scout-17b-16e-instruct", **kwargs
-):
-    # Inits the client if not already init
+def call_llama(prompt,
+              model_name="meta-llama/llama-4-scout-17b-16e-instruct",
+               **kwargs):
     return _llama_client.chat_completion(prompt, model_name, **kwargs)
-
