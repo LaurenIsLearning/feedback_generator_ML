@@ -1,10 +1,6 @@
 from docx import Document
 from docx.shared import Inches
-
 from tropos.preprocess_docx import StudentSubmission
-
-#---- for future highlight implementation---
-#from docx.shared import Pt, RGBColor
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -48,16 +44,17 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
         inline_text = inline_summary_part
 
     # Extract inline feedback pairs
-    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- ")]
+    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- QUOTE:")]
     feedback_pairs = []
     for line in inline_lines:
-        if '"' in line:
-            try:
-                quoted = line.split('"')[1]
-                comment = line.split('"')[2].strip(" -–—:")
-                feedback_pairs.append((quoted.strip(), comment.strip()))
-            except IndexError:
-                continue
+        try:
+            quote_start = line.index('QUOTE:') + len('QUOTE:')
+            comment_start = line.index('COMMENT:')
+            quoted = line[quote_start:comment_start].strip().strip('"')
+            comment = line[comment_start + len('COMMENT:'):].strip()
+            feedback_pairs.append((quoted, comment))
+        except (ValueError, IndexError):
+            continue
 
     # Apply inline feedback (bold for quoted, italic for comment)
     for para in doc.paragraphs:

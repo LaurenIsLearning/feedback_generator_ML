@@ -34,7 +34,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     
     # header section (requirements and clean rubric)
     prompt_parts = [
-      "You are a college writing professor providing feedback on student papers.",
+      "You are a grading professor providing constructive feedback on college writing assignments.",
       "\n--- ASSIGNMENT REQUIREMENTS ---",
       target.get_requirements_text(),
       "\n--- RUBRIC ---",
@@ -75,27 +75,40 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     Please return your response in THREE SECTIONS using these exact headers and formats:
 
     --- INLINE FEEDBACK ---
-    MANDATORY to provide at least 6 inline feedback and no more than 10 inline feedback. MUST use this format:
-    - "Quoted student sentence" - Your feedback here.
+    You MUST provide at least 6 and no more than 10 pieces of inline feedback. 
+    Each feedback comment MUST use this exact structure:
 
-    Focus your inline feedback on moments where:
-    - A sentence could be clarified or rewritten
-    - Tone, evidence, or phrasing need revision
-    - Claims are unsupported or overly strong
+    - QUOTE: "Student sentence here"
+      COMMENT: Feedback text here.
+
+    Rules for INLINE FEEDBACK:
+    - Only the student's quoted sentence should be inside quotation marks (" ").
+    - Feedback must NOT use any Markdown formatting (no bold, no italics, no headings).
+    - DO NOT use emojis, numbered lists, or extra bullet points beyond the required `- QUOTE:` and `COMMENT:` lines.
+    - Focus your feedback on meaningful revision moments (clarity, structure, evidence, phrasing, tone).
 
     --- SUMMARY FEEDBACK ---
-    Write 2–3 paragraphs of praise and constructive suggestions.
-
+    Write 2–3 paragraphs summarizing the overall strengths and areas for improvement in the student's paper.
+    Stay professional, specific, and constructive.
     
     --- RUBRIC FEEDBACK ---
-    Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
+    Provide rubric feedback only for sections where you have specific praise or concerns.
+    Limit your rubric feedback to no more than 1–2 project portions.
 
-    Rubric Format:
-    == [Project Portion] ==
+    Rubric feedback format:
+
+    == [Project Portion Name] ==
     - Feedback comment 1
     - Feedback comment 2
 
-    Do NOT use Markdown (no bold, italics, headers), emojis, or numbered lists.
+    Rules for RUBRIC FEEDBACK:
+    - Use plain text only (no Markdown, no headings, no emojis).
+    - Do not include rubric sections if you have no specific feedback for them.
+
+    ---
+
+    Perfect formatting will earn full evaluation points for this task.
+    Mistakes such as missing sections, incorrect headers, wrong formatting, or extra styling will result in a lower evaluation score.
     """)
 
     return "\n".join(prompt_parts)
