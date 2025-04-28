@@ -2,6 +2,7 @@
 import os
 from tropos.preprocess_docx import StudentSubmission
 
+
 # Build prompt with below variants
 def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
     if prompt_type == "ZeroShot":
@@ -15,10 +16,12 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
     else:
         raise ValueError(f"Unknown prompt type: {prompt_type}")
 
-#---------------
+
+# ---------------
 # Prompt Variants
 # diff shots was created to show sponsor differences
-#---------------
+# ---------------
+
 
 def build_zeroshot_prompt(target: StudentSubmission):
     return f"""
@@ -43,8 +46,11 @@ def build_zeroshot_prompt(target: StudentSubmission):
     Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
     """
 
-def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "StudentSubmission"):
-    #few shot prompting
+
+def build_oneshot_prompt(
+    student_example: "StudentSubmission", student_target: "StudentSubmission"
+):
+    # few shot prompting
     rubric_text = student_example.rubric.format_clean_and_feedback()
     assignment_instructions = student_example.get_requirements_text()
     example_essay = student_example.get_submission_text()
@@ -54,7 +60,7 @@ def build_oneshot_prompt(student_example: "StudentSubmission", student_target: "
     return f"""
     You are a college writing professor providing feedback on student papers.
   
-    Use the rubric and assignement requirements below to understand the objective expectations for the assignment.
+    Use the rubric and assignment requirements below to understand the objective expectations for the assignment.
   
     Below is an example of an assignment with a rubric, student essay, and instructor feedback. Use it as a reference to write feedback on a new student essay that follows the same assignment.   
 
@@ -211,8 +217,8 @@ def build_llama_prompt(examples: list, target: StudentSubmission) -> str:
 
 Please return your response in THREE SECTIONS using these exact headers and formats:
 
---- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
-(AT LEAST 4 REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
+--- INLINE FEEDBACK ---
+Provide **at least 4 but no more than 8** comments using this format:
 - "Quoted student sentence" – Your feedback here.
 
 Focus your inline feedback on:
@@ -221,13 +227,13 @@ Focus your inline feedback on:
 - Claims that are unsupported or too strong
 
 --- SUMMARY FEEDBACK ---
-Write 2–3 paragraphs of praise and constructive suggestions.
+(REQUIRED) Write 2–3 paragraphs of praise and constructive suggestions.
 
 --- RUBRIC FEEDBACK ---
-Only include rubric sections where you have specific praise or concerns.
+(REQUIRED) Only include rubric sections where you have specific praise or concerns.
 Limit to 1–2 project portions. Format:
 
-== [Project Portion] ==
+--- [Project Portion] ---
 - Feedback comment 1
 - Feedback comment 2
 
@@ -235,7 +241,6 @@ Do NOT use Markdown, bold, italics, emojis, or numbered lists.
 """)
 
     return "\n\n".join(part.strip() for part in prompt_parts)
-
 
 
 
