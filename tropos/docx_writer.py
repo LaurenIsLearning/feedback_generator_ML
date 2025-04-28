@@ -74,6 +74,8 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
                     italic_run.italic = True
                     para.add_run(parts[1])
                 break
+            else:
+               print(f"❌ No match for: '{quoted}' in paragraph: '{para.text}'")
 
     # Add summary feedback
     if summary_text.strip():
