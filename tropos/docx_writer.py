@@ -36,7 +36,6 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
 
     if "--- RUBRIC FEEDBACK ---" in feedback_text:
         inline_summary_part, rubric_text = feedback_text.split("--- RUBRIC FEEDBACK ---", 1)
-        # 🔁 Inject rubric feedback into target rubric object (you must have inject_model_feedback in rubric.py!)
         if hasattr(target, "rubric") and target.rubric:
             target.rubric.inject_model_feedback(rubric_text)
     else:
@@ -47,29 +46,48 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
     else:
         inline_text = inline_summary_part
 
-    # Extract inline feedback pairs
-    inline_lines = [line.strip() for line in inline_text.split("\n") if line.strip().startswith("- ")]
+    # Extract inline feedback pairs with improved parsing
     feedback_pairs = []
-    for line in inline_lines:
-        if '"' in line:
-            try:
-                quoted = line.split('"')[1]
-                comment = line.split('"')[2].strip(" -–—:")
-                feedback_pairs.append((quoted.strip(), comment.strip()))
-            except IndexError:
-                continue
+    current_quote = None
+    current_feedback = None
+    
+    for line in inline_text.split("\n"):
+        line = line.strip()
+        if line.startswith("- ") and '"' in line:
+            # Save previous pair if exists
+            if current_quote and current_feedback:
+                feedback_pairs.append((current_quote, current_feedback))
+            
+            # Start new pair
+            parts = line.split('"')
+            if len(parts) >= 3:
+                current_quote = parts[1]
+                current_feedback = parts[2].strip(" -–—:")
+            else:
+                current_quote = None
+                current_feedback = None
+        elif current_feedback is not None:
+            # Continuation of feedback
+            current_feedback += " " + line
+    
+    # Add the last pair if it exists
+    if current_quote and current_feedback:
+        feedback_pairs.append((current_quote, current_feedback))
 
-    # Apply inline feedback (bold for quoted, italic for comment)
+    # Apply inline feedback with improved handling
     for para in doc.paragraphs:
         for quoted, comment in feedback_pairs:
             if quoted in para.text:
+                # Clean up the comment by removing any remaining quotes or special markers
+                clean_comment = comment.replace('"', '').replace("^^", "'")
+                
                 parts = para.text.split(quoted)
                 if len(parts) >= 2:
                     para.clear()
                     para.add_run(parts[0])
                     bold_run = para.add_run(quoted)
                     bold_run.bold = True
-                    italic_run = para.add_run(f" [{comment}]")
+                    italic_run = para.add_run(f" [{clean_comment}]")
                     italic_run.italic = True
                     para.add_run(parts[1])
                 break
@@ -83,7 +101,7 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
             if line.strip():
                 doc.add_paragraph(line.strip())
 
-    # Add rubric feedback table
+    # Add rubric feedback table (existing code remains the same)
     if target.rubric:
         doc.add_paragraph("")
         rubric_header = doc.add_paragraph("Rubric Feedback:")
@@ -98,16 +116,14 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
         hdr_cells[2].text = "Overall Feedback"
 
         # Set custom widths
-        hdr_cells[0].width = Inches(1.2)  # Narrow
-        hdr_cells[1].width = Inches(2.8)  # Ideal criteria
-        hdr_cells[2].width = Inches(3.5)  # Feedback
+        hdr_cells[0].width = Inches(1.2)
+        hdr_cells[1].width = Inches(2.8)
+        hdr_cells[2].width = Inches(3.5)
 
         for portion in target.rubric.get_criteria():
-
             portion_name = portion["portion"]
             criteria_text = "• " + "\n• ".join(c["text"] for c in portion["criteria"])
             feedback_text = "\n".join(f"- {f['text']}" for f in portion.get("feedback", []))
-
 
             row_cells = table.add_row().cells
             row_cells[0].text = portion_name
