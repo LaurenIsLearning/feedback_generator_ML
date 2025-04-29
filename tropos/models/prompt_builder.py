@@ -136,6 +136,7 @@ def load_profile_from_txt(path: str) -> str:
 # ---------------
 
 ##------- few shot using FULL instructor profile
+#------- few shot using FULL instructor profile
 def build_profile_based_prompt(profile_text: str, target: 'StudentSubmission') -> str:
     """
     Constructs a prompt using a prebuilt instructor profile instead of re-including full examples.
@@ -154,28 +155,43 @@ def build_profile_based_prompt(profile_text: str, target: 'StudentSubmission') -
         "\n--- FORMAT INSTRUCTIONS (IMPORTANT) ---",
         
         """
-        Please return your response in THREE SECTIONS using these exact headers:
+        Please return your response in THREE SECTIONS using these exact headers and formats:
 
         --- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
-        Provide 4–8 inline comments:
+        Provide 4–8 comments using this format:
         - "Quoted student sentence" – Your feedback.
 
+        IMPORTANT RULES FOR FEEDBACK:
+        1. ONLY use quotation marks around the student's quoted sentence, but NEVER use quotation marks in your feedback portion (after the –).
+        2. Example of what NOT to do: - "Quote" – Feedback "with quotes" is bad
+        3. Example of correct format: - "Quote" – Feedback without quotes is good
+        4. NEVER just write [the word] or [the phrase] without context.
+
+        Focus your inline feedback on moments where:
+        - A sentence could be clarified or rewritten
+        - Tone, evidence, or phrasing needs revision
+        - Claims are unsupported or overly strong
+
         --- SUMMARY FEEDBACK ---
-        Write 2–3 paragraphs of overall praise and suggestions.
+        Write 2–3 paragraphs of praise and constructive suggestions.
 
         --- RUBRIC FEEDBACK ---
-        Comment on only 1–2 rubric sections.
-        Use this format:
-        == [Project Portion] ==
-        - Comment 1
-        - Comment 2
+        Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
 
-        Do NOT use Markdown (no bold, italics, headers).
-        Keep comments supportive but constructive.
+        Rubric Format:
+        == [Project Portion] ==
+        - Feedback comment 1
+        - Feedback comment 2
+
+        GENERAL RULES:
+        - Do NOT use Markdown (no bold, italics, headers).
+        - Do NOT use emojis.
+        - Do NOT use numbered lists.
         """
     ]
 
     return "\n".join(prompt_parts)
+
 
 
 
