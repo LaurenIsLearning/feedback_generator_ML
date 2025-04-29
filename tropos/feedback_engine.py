@@ -31,9 +31,16 @@ def run_feedback_batch(
   if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-  examples = load_all_student_examples_recursive(example_dir, requirements_path)
-  if max_examples:
-    examples = examples[:max_examples]
+  examples = None  # Default to None
+
+  if prompt_type != "ProfileShot":
+    examples = load_all_student_examples_recursive(example_dir, requirements_path)
+    if max_examples:
+        examples = examples[:max_examples]
+
+    if not examples:
+        raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
+
 
   if not examples:
     raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
