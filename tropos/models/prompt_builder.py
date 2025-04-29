@@ -76,11 +76,11 @@ def generate_full_instructor_profile(
     examples = load_all_student_examples_recursive(examples_dir, requirements_path, verbose=False)
 
     print(f"📦 Loaded {len(examples)} examples")
-    for ex in examples:
-        # print(f"✅ Example loaded: {ex.submission_path}")
-
-    if not examples:
-        raise ValueError("❌ No examples found in directory.")
+    #for ex in examples:
+    #    print(f"✅ Example loaded: {ex.submission_path}")
+    #
+    #if not examples:
+    #    raise ValueError("❌ No examples found in directory.")
 
     mini_profiles = []
 

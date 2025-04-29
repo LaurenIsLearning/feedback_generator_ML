@@ -41,10 +41,6 @@ def run_feedback_batch(
     if not examples:
         raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
 
-
-  if not examples:
-    raise ValueError(f"❌ No examples found in {example_dir}. Make sure it contains .docx files.")
-
   targets = load_all_targets_recursive(target_dir, requirements_path)
   if not targets:
     raise ValueError(f"❌ No target submissions found in {target_dir}.")

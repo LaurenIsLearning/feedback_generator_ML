@@ -122,7 +122,7 @@ class Rubric:
 # --------------------------
 def parse_rubric(doc_path: str) -> "Rubric":
     rubric = Rubric()
-    print(doc_path)
+    # print(doc_path)
     doc = Document(doc_path)
 
     # Assume last table is rubric
