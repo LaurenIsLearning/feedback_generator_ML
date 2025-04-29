@@ -228,6 +228,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     prompt_parts.append(target.get_submission_text())
 
     # Format instructions (match docx_writer.py)
+     # Update the format instructions section to add the quotation mark restriction
     prompt_parts.append("""
     --- FORMAT INSTRUCTIONS (IMPORTANT) ---
 
@@ -237,6 +238,12 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     (AT LEAST 4 REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
     - "Quoted student sentence" – Your feedback here.
 
+    IMPORTANT RULES FOR FEEDBACK:
+    1. ONLY use quotation marks around the student's quoted sentence, but NEVER use quotation marks in your feedback portion (after the –), INSTEAD OF QUOTES, USE KARATS ^^, EXCEPT IF FORMATTING RULE 1
+    2. Example of what NOT to do: - "Quote" – Feedback "with quotes" is bad
+    3. Example of correct format: - ^^Quote^^ – Feedback without any quotation marks is good
+    4. NEVER just write [the word] or [the phrase]
+
     Focus your inline feedback on moments where:
     - A sentence could be clarified or rewritten
     - Tone, evidence, or phrasing need revision
@@ -245,7 +252,6 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     --- SUMMARY FEEDBACK ---
     Write 2–3 paragraphs of praise and constructive suggestions.
 
-    
     --- RUBRIC FEEDBACK ---
     Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
 
@@ -299,6 +305,7 @@ def build_llama_prompt(examples: list, target: StudentSubmission) -> str:
     prompt_parts.append(target.get_submission_text() or "[NO SUBMISSION TEXT]")
 
     # Feedback format instructions (LLaMA-friendly, no markdown, no emojis)
+    # Feedback format instructions (LLaMA-friendly, no markdown, no emojis)
     prompt_parts.append("""--- FORMAT INSTRUCTIONS (IMPORTANT) ---
 
 Please return your response in THREE SECTIONS using these exact headers and formats:
@@ -306,6 +313,11 @@ Please return your response in THREE SECTIONS using these exact headers and form
 --- INLINE FEEDBACK ---
 Provide **at least 4 but no more than 8** comments using this format:
 - "Quoted student sentence" – Your feedback here.
+
+IMPORTANT RULES FOR FEEDBACK:
+1. Only use quotation marks around the student's quoted sentence
+2. Never use quotation marks in your feedback portion (after the –)
+3. If you need to reference something that would normally need quotes, rephrase without them
 
 Focus your inline feedback on:
 - Sentence clarity or rewriting
@@ -400,7 +412,6 @@ def build_oneshot_prompt(
     ⚠️ Only use the format: - "Quoted student sentence" – feedback
     Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
     """
-
 
 
 
