@@ -142,6 +142,9 @@ def build_profile_based_prompt(profile_text: str, target: 'StudentSubmission') -
     Constructs a prompt using a prebuilt instructor profile instead of re-including full examples.
     """
 
+    # Helper to list real rubric sections
+    rubric_section_names = ", ".join(section["portion"] for section in target.rubric.get_criteria())
+    
     prompt_parts = [
         "You are a college writing professor providing feedback on student papers.",
         "\n--- INSTRUCTOR FEEDBACK PROFILE ---",
@@ -167,26 +170,35 @@ def build_profile_based_prompt(profile_text: str, target: 'StudentSubmission') -
         3. Example of correct format: - "Quote" – Feedback without quotes is good
         4. NEVER just write [the word] or [the phrase] without context.
 
-        Focus your inline feedback on moments where:
-        - A sentence could be clarified or rewritten
-        - Tone, evidence, or phrasing needs revision
-        - Claims are unsupported or overly strong
+        Focus your inline feedback on:
+        - Sentences that could be clarified or rewritten
+        - Tone, evidence, or phrasing issues
+        - Claims that are unsupported or overly strong
 
         --- SUMMARY FEEDBACK ---
         Write 2–3 paragraphs of praise and constructive suggestions.
+        Keep tone supportive but clear about necessary improvements.
 
         --- RUBRIC FEEDBACK ---
-        Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
+        Only include feedback for 1–2 sections listed below. Use EXACT section names (no made-up names).
 
-        Rubric Format:
-        == [Project Portion] ==
-        - Feedback comment 1
-        - Feedback comment 2
+        Available Rubric Sections:
+        {rubric_section_names}
 
-        GENERAL RULES:
-        - Do NOT use Markdown (no bold, italics, headers).
+        Format rubric feedback like this:
+        == [Exact Rubric Section Name] ==
+        - Comment 1
+        - Comment 2
+
+        IMPORTANT RULES FOR RUBRIC FEEDBACK:
+        - Only comment on real rubric sections listed.
+        - Do not invent new section names.
+        - Do not merge sections together.
+
+        FINAL REMINDERS:
+        - Do NOT use Markdown formatting (no bold, italics, or headers).
         - Do NOT use emojis.
-        - Do NOT use numbered lists.
+        - Do NOT use numbered lists (only bullet points).
         """
     ]
 
