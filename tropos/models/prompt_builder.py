@@ -1,10 +1,13 @@
 #builds prompts for all models
 import os
 from tropos.preprocess_docx import StudentSubmission
+from typing import List
+from tropos.models.model_router import call_model
+from utils.student_loader import load_all_student_examples_recursive
 
 
 # Build prompt with below variants
-def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
+def build_prompt(prompt_type: str, examples: list, target: StudentSubmission, profile_text: str = None):
     if prompt_type == "ZeroShot":
         return build_zeroshot_prompt(target)
     elif prompt_type == "OneShot":
@@ -13,8 +16,115 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
         return build_fewshot_prompt(examples, target)
     elif prompt_type == "FewShot-Llama":
         return build_llama_prompt(examples, target)
+    elif prompt_type == "ProfileShot":
+        if not profile_text:
+            raise ValueError("ProfileShot requires profile_text parameter.")
+        return build_profile_based_prompt(profile_text, target)
     else:
         raise ValueError(f"Unknown prompt type: {prompt_type}")
+
+# ---------------
+# Generate Instructor Profile Builder
+# ---------------
+
+##------------------bath example loader
+def batch_examples(examples: List, batch_size: int = 5) -> List[List]:
+  #splits examples into bathches of size batch_size
+  return [examples[i:i+batch_size] for i in range(0, len(examples), batch_size)]
+
+##----------------------generate mini profile for ONE batch
+def build_batch_prompt(batch_examples: List) -> str:
+    """Builds a prompt for a batch of examples to generate a mini feedback profile."""
+    parts = [
+        "You are helping create a Feedback Profile for a college writing instructor.",
+        "Below are several examples of student submissions, instructor inline comments, and rubric feedback.",
+        "Analyze the examples and summarize the instructor's feedback habits, tone, priorities, and style."
+    ]
+
+    for ex in batch_examples:
+        submission_name = os.path.basename(ex.submission_path).replace(".docx", "")
+        submission_text = ex.get_submission_text()
+        comments_text = ex.get_comments_text()
+        rubric_feedback = ex.get_rubric_feedback()
+
+
+        parts.append(f"""
+        --- EXAMPLE ({submission_name}) ---
+        Student Submission:
+        {submission_text or '[NO SUBMISSION TEXT]'}
+
+        Instructor Inline Feedback:
+        {comments_text or '[No comments for paper]'}
+
+        Rubric Feedback:
+        {rubric_feedback or '[No rubric feedback for paper]'}
+        """)
+    return "\n".join(parts)
+
+def generate_mini_profile(batch_examples: List, model_name="gpt-4o") -> str:
+    """Uses default GPT API to generate a mini profile from a batch of examples."""
+    prompt = build_batch_prompt(batch_examples)
+    response = call_model(prompt, model=model_name)
+    return response.strip()
+
+##--------------FULL instructor profile generation (combination of batches)
+def generate_full_instructor_profile(examples_dir: str, batch_size: int = 3, model_name="gpt-4o", debug: bool = False) -> str:
+    """Generates a full instructor profile from all examples in the given directory."""
+    examples = load_all_student_examples_recursive(examples_dir)
+
+    if not examples:
+        raise ValueError("❌ No examples found in directory.")
+
+    mini_profiles = []
+
+    for idx, batch in enumerate(batch_examples(examples, batch_size=batch_size)):
+        if debug:
+            print(f"🔹 Processing Batch {idx + 1} ({len(batch)} examples)")
+
+        mini_profile = generate_mini_profile(batch, model_name=model_name)
+        
+        if debug:
+            print(f"📝 Mini Profile {idx + 1}:\n{mini_profile}\n{'-'*40}\n")
+
+        mini_profiles.append(mini_profile.strip())
+
+    if debug:
+        print("🔧 Merging mini profiles into the final Instructor Profile...\n")
+
+    merge_prompt = f"""
+    You are a writing professor trainer.
+
+    Below are multiple mini-profiles describing an instructor's feedback style.
+
+    Please synthesize them into a single coherent Instructor Feedback Profile. 
+    Highlight common patterns, tone, priorities, and minimize contradictions.
+
+    ---
+    {chr(10).join(mini_profiles)}
+    ---
+    """
+
+    final_profile = call_model(merge_prompt, model_name=model_name)
+
+    if debug:
+        print("✅ Final Instructor Profile Generated:\n")
+        print(final_profile)
+        print("\n" + "="*80 + "\n")
+
+    return final_profile.strip()
+
+
+#-- save profile when made to save on tokens
+def load_profile_from_txt(path: str) -> str:
+    """Loads a saved instructor profile from a text file."""
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"❌ Profile file not found: {path}")
+    
+    with open(path, "r", encoding="utf-8") as f:
+        profile = f.read()
+    
+    return profile.strip()
+
 
 
 # ---------------
@@ -22,76 +132,49 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission):
 # diff shots was created to show sponsor differences
 # ---------------
 
-
-def build_zeroshot_prompt(target: StudentSubmission):
-    return f"""
-    You are a college writing professor providing feedback on student papers.
-
-    📌 Assignment Requirements:
-    {target.get_requirements_text()}
-
-    📋 Rubric:
-    {target.rubric.format_clean_only()}
-
-    📄 Student Essay:
-    {target.get_submission_text()}
-
-    🧑‍🏫 Please provide feedback using this format:
-    - "Quoted student sentence" – Your feedback in plain English.
-
-    Summary Feedback:
-    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
-
-    ⚠️ Only use the format: - "Quoted student sentence" – feedback
-    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
+##------- few shot using FULL instructor profile
+def build_profile_based_prompt(profile_text: str, target: 'StudentSubmission') -> str:
+    """
+    Constructs a prompt using a prebuilt instructor profile instead of re-including full examples.
     """
 
+    prompt_parts = [
+        "You are a college writing professor providing feedback on student papers.",
+        "\n--- INSTRUCTOR FEEDBACK PROFILE ---",
+        profile_text,
+        "\n--- ASSIGNMENT REQUIREMENTS ---",
+        target.get_requirements_text(),
+        "\n--- RUBRIC ---",
+        target.get_clean_rubric(),
+        "\n--- SUBMITTED ESSAY ---",
+        target.get_submission_text(),
+        "\n--- FORMAT INSTRUCTIONS (IMPORTANT) ---",
+        
+        """
+        Please return your response in THREE SECTIONS using these exact headers:
 
-def build_oneshot_prompt(
-    student_example: "StudentSubmission", student_target: "StudentSubmission"
-):
-    # few shot prompting
-    rubric_text = student_example.rubric.format_clean_and_feedback()
-    assignment_instructions = student_example.get_requirements_text()
-    example_essay = student_example.get_submission_text()
-    example_comments = student_example.get_comments_text()
-    target_essay = student_target.get_submission_text()
+        --- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
+        Provide 4–8 inline comments:
+        - "Quoted student sentence" – Your feedback.
 
-    return f"""
-    You are a college writing professor providing feedback on student papers.
-  
-    Use the rubric and assignment requirements below to understand the objective expectations for the assignment.
-  
-    Below is an example of an assignment with a rubric, student essay, and instructor feedback. Use it as a reference to write feedback on a new student essay that follows the same assignment.   
+        --- SUMMARY FEEDBACK ---
+        Write 2–3 paragraphs of overall praise and suggestions.
 
-    ---
+        --- RUBRIC FEEDBACK ---
+        Comment on only 1–2 rubric sections.
+        Use this format:
+        == [Project Portion] ==
+        - Comment 1
+        - Comment 2
 
-    📄 Example Essay:
-    {example_essay}
+        Do NOT use Markdown (no bold, italics, headers).
+        Keep comments supportive but constructive.
+        """
+    ]
 
-    🧑‍🏫 Instructor Feedback:
-    {example_comments}
+    return "\n".join(prompt_parts)
 
-    📌 Assignment Requirements:
-    {assignment_instructions}
 
-    📋 Rubric:
-    {rubric_text}
-    
-    ---
-
-    📄 New Essay:
-    {target_essay}
-
-    🧑‍🏫 Please provide feedback using this format:
-    - "Quoted student sentence" – Your feedback in plain English.
-
-    Summary Feedback:
-    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
-
-    ⚠️ Only use the format: - "Quoted student sentence" – feedback
-    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
-    """
 
 def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     """
@@ -244,6 +327,76 @@ Do NOT use Markdown, bold, italics, emojis, or numbered lists.
 
 
 
+
+def build_zeroshot_prompt(target: StudentSubmission):
+    return f"""
+    You are a college writing professor providing feedback on student papers.
+
+    📌 Assignment Requirements:
+    {target.get_requirements_text()}
+
+    📋 Rubric:
+    {target.rubric.format_clean_only()}
+
+    📄 Student Essay:
+    {target.get_submission_text()}
+
+    🧑‍🏫 Please provide feedback using this format:
+    - "Quoted student sentence" – Your feedback in plain English.
+
+    Summary Feedback:
+    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
+
+    ⚠️ Only use the format: - "Quoted student sentence" – feedback
+    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
+    """
+
+
+def build_oneshot_prompt(
+    student_example: "StudentSubmission", student_target: "StudentSubmission"
+):
+    # few shot prompting
+    rubric_text = student_example.rubric.format_clean_and_feedback()
+    assignment_instructions = student_example.get_requirements_text()
+    example_essay = student_example.get_submission_text()
+    example_comments = student_example.get_comments_text()
+    target_essay = student_target.get_submission_text()
+
+    return f"""
+    You are a college writing professor providing feedback on student papers.
+  
+    Use the rubric and assignment requirements below to understand the objective expectations for the assignment.
+  
+    Below is an example of an assignment with a rubric, student essay, and instructor feedback. Use it as a reference to write feedback on a new student essay that follows the same assignment.   
+
+    ---
+
+    📄 Example Essay:
+    {example_essay}
+
+    🧑‍🏫 Instructor Feedback:
+    {example_comments}
+
+    📌 Assignment Requirements:
+    {assignment_instructions}
+
+    📋 Rubric:
+    {rubric_text}
+    
+    ---
+
+    📄 New Essay:
+    {target_essay}
+
+    🧑‍🏫 Please provide feedback using this format:
+    - "Quoted student sentence" – Your feedback in plain English.
+
+    Summary Feedback:
+    At the end of your response, include a section labeled 'Summary Feedback:' with 2–3 paragraphs of praise and suggestions for improvement.
+
+    ⚠️ Only use the format: - "Quoted student sentence" – feedback
+    Do not use Markdown (no **bold** or _italic_), emojis, or numbered lists.
+    """
 
 
 
