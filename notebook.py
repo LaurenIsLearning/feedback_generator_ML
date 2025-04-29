@@ -144,40 +144,40 @@ test_feedback_console(
 
 """## **--Currently Running Models**"""
 
-# # GPT-4o
-# test_feedback_console(
-#     prompt_type="FewShot",
-#     model="gpt-4o",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
-#     output_mode="pretty",
-#     max_examples=3
-# )
+# GPT-4o
+test_feedback_console(
+    prompt_type="FewShot",
+    model="gpt-4o",
+    requirements_path=reqs_file,
+    example_dir=examples_dir,
+    target_dir=targets_dir,
+    output_dir=outputs_dir,
+    output_mode="pretty",
+    max_examples=3
+)
 
 """## **-- Different Models** (Commented out for now)"""
 
-# # GPT-4.1
-# test_feedback_console(
-#     prompt_type="FewShot",
-#     model="gpt-4.1",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
-#     output_mode="raw",
-#     max_examples=3
-# )
+# Gemini
+test_feedback_console(
+    prompt_type="FewShot",
+    model="gemini-1.5-pro-latest",
+    requirements_path=reqs_file,
+    example_dir=examples_dir,
+    target_dir=targets_dir,
+    output_dir=outputs_dir,
+    output_mode="pretty",
+    max_examples=3
+)
 
 # # GPT-4.1
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="gpt-4.1",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
+#     requirements_path=reqs_file,
+#     example_dir=examples_dir,
+#     target_dir=targets_dir,
+#     output_dir=outputs_dir,
 #     output_mode="pretty",
 #     max_examples=3
 # )
@@ -186,22 +186,10 @@ test_feedback_console(
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="deepseek-chat",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
-#     output_mode="pretty",
-#     max_examples=3
-# )
-
-# # Gemini
-# test_feedback_console(
-#     prompt_type="FewShot",
-#     model="gemini-1.5-pro-latest",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
+#     requirements_path=reqs_file,
+#     example_dir=examples_dir,
+#     target_dir=targets_dir,
+#     output_dir=outputs_dir,
 #     output_mode="pretty",
 #     max_examples=3
 # )
@@ -210,10 +198,10 @@ test_feedback_console(
 # test_feedback_console(
 #     prompt_type="FewShot-Llama",
 #     model="meta-llama/llama-4-scout-17b-16e-instruct",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
+#     requirements_path=reqs_file,
+#     example_dir=examples_dir,
+#     target_dir=targets_dir,
+#     output_dir=outputs_dir,
 #     output_mode="pretty",
 #     max_examples=3
 # )
@@ -222,10 +210,10 @@ test_feedback_console(
 # test_feedback_console(
 #     prompt_type="FewShot",
 #     model="claude-3-opus-20240229",
-#     requirements_path=reqs,
-#     example_dir=examples,
-#     target_dir=targets,
-#     output_dir=outputs,
+#     requirements_path=reqs_file,
+#     example_dir=examples_dir,
+#     target_dir=targets_dir,
+#     output_dir=outputs_dir,
 #     output_mode="pretty",
 #     max_examples=3
 # )
