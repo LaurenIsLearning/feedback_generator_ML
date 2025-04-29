@@ -27,14 +27,13 @@ def build_prompt(prompt_type: str, examples: list, target: StudentSubmission, pr
 # Generate Instructor Profile Builder
 # ---------------
 
-##------------------bath example loader
-def batch_examples(examples: List, batch_size: int = 5) -> List[List]:
-  #splits examples into bathches of size batch_size
-  return [examples[i:i+batch_size] for i in range(0, len(examples), batch_size)]
 
-##----------------------generate mini profile for ONE batch
+# Batch examples into smaller groups
+def batch_examples(examples: List, batch_size: int = 5) -> List[List]:
+    return [examples[i:i+batch_size] for i in range(0, len(examples), batch_size)]
+
+# Build a prompt for a batch of examples
 def build_batch_prompt(batch_examples: List) -> str:
-    """Builds a prompt for a batch of examples to generate a mini feedback profile."""
     parts = [
         "You are helping create a Feedback Profile for a college writing instructor.",
         "Below are several examples of student submissions, instructor inline comments, and rubric feedback.",
@@ -47,37 +46,38 @@ def build_batch_prompt(batch_examples: List) -> str:
         comments_text = ex.get_comments_text()
         rubric_feedback = ex.get_rubric_feedback()
 
-
         parts.append(f"""
-        --- EXAMPLE ({submission_name}) ---
-        Student Submission:
-        {submission_text or '[NO SUBMISSION TEXT]'}
+--- EXAMPLE ({submission_name}) ---
+Student Submission:
+{submission_text or '[NO SUBMISSION TEXT]'}
 
-        Instructor Inline Feedback:
-        {comments_text or '[No comments for paper]'}
+Instructor Inline Feedback:
+{comments_text or '[No comments for paper]'}
 
-        Rubric Feedback:
-        {rubric_feedback or '[No rubric feedback for paper]'}
-        """)
+Rubric Feedback:
+{rubric_feedback or '[No rubric feedback for paper]'}
+""")
     return "\n".join(parts)
 
+# Generate a mini profile for a batch
 def generate_mini_profile(batch_examples: List, model_name="gpt-4o") -> str:
-    """Uses default GPT API to generate a mini profile from a batch of examples."""
     prompt = build_batch_prompt(batch_examples)
     response = call_model(prompt, model_name=model_name)
     return response.strip()
 
-##--------------FULL instructor profile generation (combination of batches)
+# FULL Instructor Profile Builder
 def generate_full_instructor_profile(
     examples_dir: str,
     requirements_path: str,
-    batch_size: int = 3,
+    batch_size: int = 5,
     model_name: str = "gpt-4o",
     debug: bool = False
 ) -> str:
-    """Generates a full instructor profile from all examples in the given directory."""
-    
     examples = load_all_student_examples_recursive(examples_dir, requirements_path, verbose=False)
+
+    print(f"📦 Loaded {len(examples)} examples")
+    for ex in examples:
+        # print(f"✅ Example loaded: {ex.submission_path}")
 
     if not examples:
         raise ValueError("❌ No examples found in directory.")
@@ -120,9 +120,8 @@ Highlight common patterns, tone, priorities, and minimize contradictions.
 
     return final_profile.strip()
 
-
+# Load a saved profile
 def load_profile_from_txt(path: str) -> str:
-    """Loads a saved instructor profile from a text file."""
     if not os.path.exists(path):
         raise FileNotFoundError(f"❌ Profile file not found: {path}")
 
