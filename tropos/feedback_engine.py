@@ -18,7 +18,8 @@ def run_feedback_batch(
   target_dir=None,
   output_dir="./data/generated_output",
   output_mode="none", #"pretty", "raw", or "none"
-  max_examples=None #change this WHEN CALLED to tinker with # of examples
+  max_examples=None, #change this WHEN CALLED to tinker with # of examples
+  profile_text=None
 ):
 
   #fall back to internal project paths
@@ -46,7 +47,10 @@ def run_feedback_batch(
 
   for student_name, target in targets:
         target.rubric = shared_rubric 
-        prompt = build_prompt(prompt_type, examples, target)
+        if prompt_type == "ProfileShot":
+          prompt = build_prompt(prompt_type, examples=None, target=target, profile_text=profile_text)
+        else:
+          prompt = build_prompt(prompt_type, examples, target)
         feedback = call_model(prompt, model_name=model)
 
         # Extract rubric feedback and inject it into target rubric

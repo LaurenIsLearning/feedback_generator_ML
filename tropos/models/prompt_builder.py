@@ -121,7 +121,15 @@ Highlight common patterns, tone, priorities, and minimize contradictions.
     return final_profile.strip()
 
 
+def load_profile_from_txt(path: str) -> str:
+    """Loads a saved instructor profile from a text file."""
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"❌ Profile file not found: {path}")
 
+    with open(path, "r", encoding="utf-8") as f:
+        profile = f.read()
+
+    return profile.strip()
 
 # ---------------
 # Prompt Variants

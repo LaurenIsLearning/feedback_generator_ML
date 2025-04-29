@@ -13,7 +13,8 @@ def test_feedback_console(
     target_dir="./data/unmarked_raw",
     output_dir="./data/generated_output",
     output_mode="none",
-    max_examples=None
+    max_examples=None,
+    profile_text=None
 ):
     run_feedback_batch(
         prompt_type=prompt_type,
@@ -23,7 +24,8 @@ def test_feedback_console(
         target_dir=target_dir,
         output_dir=output_dir,
         output_mode=output_mode,
-        max_examples=max_examples
+        max_examples=max_examples,
+        profile_text=profile_text
     )
 
 def main():
