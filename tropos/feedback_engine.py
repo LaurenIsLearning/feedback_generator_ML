@@ -45,7 +45,9 @@ def run_feedback_batch(
   if not targets:
     raise ValueError(f"❌ No target submissions found in {target_dir}.")
 
-  shared_rubric = examples[0].rubric  # now safe to use!
+  shared_rubric = None
+  if examples:
+    shared_rubric = examples[0].rubric
 
 
   for student_name, target in targets:
@@ -66,7 +68,8 @@ def run_feedback_batch(
         
         filename = os.path.splitext(os.path.basename(target.submission_path))[0]
         safe_model_name = model.replace("/", "_")
-        output_path = os.path.join(output_dir, f"{filename}_{safe_model_name}.docx")
+        safe_prompt_type = prompt_type.replace("/", "_")  # just in case
+        output_path = os.path.join(output_dir, f"{filename}_{safe_prompt_type}_{safe_model_name}.docx")
 
         write_feedback_to_docx(
             submission_path=target.submission_path,
