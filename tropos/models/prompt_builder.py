@@ -77,7 +77,7 @@ def generate_full_instructor_profile(
 ) -> str:
     """Generates a full instructor profile from all examples in the given directory."""
     
-    examples = load_all_student_examples_recursive(examples_dir, requirements_path)
+    examples = load_all_student_examples_recursive(examples_dir, requirements_path, verbose=False)
 
     if not examples:
         raise ValueError("❌ No examples found in directory.")
