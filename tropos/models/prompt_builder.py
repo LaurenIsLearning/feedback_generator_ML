@@ -64,13 +64,20 @@ def build_batch_prompt(batch_examples: List) -> str:
 def generate_mini_profile(batch_examples: List, model_name="gpt-4o") -> str:
     """Uses default GPT API to generate a mini profile from a batch of examples."""
     prompt = build_batch_prompt(batch_examples)
-    response = call_model(prompt, model=model_name)
+    response = call_model(prompt, model_name=model_name)
     return response.strip()
 
 ##--------------FULL instructor profile generation (combination of batches)
-def generate_full_instructor_profile(examples_dir: str, batch_size: int = 3, model_name="gpt-4o", debug: bool = False) -> str:
+def generate_full_instructor_profile(
+    examples_dir: str,
+    requirements_path: str,
+    batch_size: int = 3,
+    model_name: str = "gpt-4o",
+    debug: bool = False
+) -> str:
     """Generates a full instructor profile from all examples in the given directory."""
-    examples = load_all_student_examples_recursive(examples_dir)
+    
+    examples = load_all_student_examples_recursive(examples_dir, requirements_path)
 
     if not examples:
         raise ValueError("❌ No examples found in directory.")
@@ -82,7 +89,7 @@ def generate_full_instructor_profile(examples_dir: str, batch_size: int = 3, mod
             print(f"🔹 Processing Batch {idx + 1} ({len(batch)} examples)")
 
         mini_profile = generate_mini_profile(batch, model_name=model_name)
-        
+
         if debug:
             print(f"📝 Mini Profile {idx + 1}:\n{mini_profile}\n{'-'*40}\n")
 
@@ -92,17 +99,17 @@ def generate_full_instructor_profile(examples_dir: str, batch_size: int = 3, mod
         print("🔧 Merging mini profiles into the final Instructor Profile...\n")
 
     merge_prompt = f"""
-    You are a writing professor trainer.
+You are a writing professor trainer.
 
-    Below are multiple mini-profiles describing an instructor's feedback style.
+Below are multiple mini-profiles describing an instructor's feedback style.
 
-    Please synthesize them into a single coherent Instructor Feedback Profile. 
-    Highlight common patterns, tone, priorities, and minimize contradictions.
+Please synthesize them into a single coherent Instructor Feedback Profile. 
+Highlight common patterns, tone, priorities, and minimize contradictions.
 
-    ---
-    {chr(10).join(mini_profiles)}
-    ---
-    """
+---
+{chr(10).join(mini_profiles)}
+---
+"""
 
     final_profile = call_model(merge_prompt, model_name=model_name)
 
@@ -113,17 +120,6 @@ def generate_full_instructor_profile(examples_dir: str, batch_size: int = 3, mod
 
     return final_profile.strip()
 
-
-#-- save profile when made to save on tokens
-def load_profile_from_txt(path: str) -> str:
-    """Loads a saved instructor profile from a text file."""
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"❌ Profile file not found: {path}")
-    
-    with open(path, "r", encoding="utf-8") as f:
-        profile = f.read()
-    
-    return profile.strip()
 
 
 
