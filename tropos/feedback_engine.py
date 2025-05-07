@@ -72,19 +72,9 @@ def run_feedback_batch(
           except Exception as e:
             print(f"⚠️ Could not inject rubric feedback for {student_name}: {e}")
 
-        #build relative path to recreate file structure
-        relative_path = os.path.relpath(target.submission_path, target_dir)
-        relative_folder = os.path.dirname(relative_path)
-        filename = os.path.splitext(os.path.basename(relative_path))[0]
-
+        filename = os.path.splitext(os.path.basename(target.submission_path))[0]
         safe_model_name = model.replace("/", "_")
         safe_prompt_type = prompt_type.replace("/", "_")
-
-        #create full output directory if needed
-        output_subdir = os.path.join(output_dir, relative_folder)
-        os.makedirs(output_subdir, exist_ok=True)
-
-        #build full output bath
         output_path = os.path.join(output_dir, f"{filename}_{safe_prompt_type}_{safe_model_name}.docx")
 
         write_feedback_to_docx(
