@@ -31,7 +31,7 @@ def write_feedback_to_docx(
     feedback_text: str,
     output_path: str,
     target: StudentSubmission,
-    raw_prompt=prompt,
+    raw_prompt=None,
     debug_output: bool = False,
     include_prompt: bool = False
 ):
