@@ -215,13 +215,14 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     - Assignment requirements (once)
     - Clean rubric (once)
     - Multiple examples interated (submission, inline comments, rubric feedback)
-    - Target essay (no feedback or rubric yet)
-    - Feedback format instructions
+    - Target essay (no feedback)
+    - Style-matching and format-specific instructions
     """
     
     # header section (requirements and clean rubric)
     prompt_parts = [
       "You are a college writing professor providing feedback on student papers.",
+      "Below are several annotated examples from the same instructor. Use them to guide your style and focus.",
       "\n--- ASSIGNMENT REQUIREMENTS ---",
       target.get_requirements_text(),
       "\n--- RUBRIC ---",
@@ -241,7 +242,7 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
 
         prompt_parts.append(f"""
           --- EXAMPLE ESSAY ({submission_name}) ---
-          {submission_text or '[NO SUBMISSION TEXT]'}
+          {submission_text or '[No submission text]'}
 
           --- INSTRUCTOR FEEDBACK ---
           {comments_text or '[No comments for paper]'}
@@ -258,37 +259,59 @@ def build_fewshot_prompt(examples: list, target: StudentSubmission) -> str:
     # Format instructions (match docx_writer.py)
      # Update the format instructions section to add the quotation mark restriction
     prompt_parts.append("""
+    Use the examples provided above as a style reference.
+
+    Match the instructor’s tone, style, and level of detail in your feedback. 
+    If the instructor emphasizes structure, clarity, or evidence in the examples, prioritize those in your feedback as well.
+    Avoid introducing new concerns not seen in the examples unless critically necessary.
+
+
     --- FORMAT INSTRUCTIONS (IMPORTANT) ---
 
-    Please return your response in THREE SECTIONS using these exact headers and formats:
+    Please return your response in THREE clearly labeled sections using the exact headers below:
 
     --- INLINE FEEDBACK (AT LEAST 4 REQUIRED) ---
-    (AT LEAST 4 REQUIRED) Provide **at least 4 but no more than 8** comments using this format:
-    - "Quoted student sentence" – Your feedback here.
+    Provide at least 4 inline comments total, but no more than 10.
+    As a general guideline, aim for around 2–3 comments per 400 words of student writing.
 
-    IMPORTANT RULES FOR FEEDBACK:
-    1. ONLY use quotation marks around the student's quoted sentence, but NEVER use quotation marks in your feedback portion (after the –), INSTEAD OF QUOTES, USE KARATS ^^, EXCEPT IF FORMATTING RULE 1
-    2. Example of what NOT to do: - "Quote" – Feedback "with quotes" is bad
-    3. Example of correct format: - ^^Quote^^ – Feedback without any quotation marks is good
-    4. NEVER just write [the word] or [the phrase]
+    Use this format for each comment:
+    - "Quoted student sentence" – Feedback without quotes in the comment.
+
+    IMPORTANT RULES:
+    1. Only use quotation marks around the student quote.
+    2. NEVER use quotation marks in the feedback itself — instead, use karats: ^^like this^^.
+    3. Do NOT write just “[the word]” or vague markers. Be clear and specific.
 
     Focus your inline feedback on moments where:
     - A sentence could be clarified or rewritten
     - Tone, evidence, or phrasing need revision
     - Claims are unsupported or overly strong
 
+    Mirror the tone, structure, and types of comments used in the example feedback.
+    If examples emphasize clarity, organization, or evidence, prioritize those.
+
     --- SUMMARY FEEDBACK ---
-    Write 2–3 paragraphs of praise and constructive suggestions.
+    Write 2–3 paragraphs summarizing strengths and areas for improvement.
+    Keep a professional, encouraging tone.
+    If previous examples had a specific voice or structure, match it here.
 
     --- RUBRIC FEEDBACK ---
-    Only include rubric sections where you have specific praise or concerns. **Limit your comments to 1–2 project portions**.
+    Include rubric comments for ONLY 1–2 sections.
+    Use the exact section names from the rubric above.
 
     Rubric Format:
     == [Project Portion] ==
     - Feedback comment 1
     - Feedback comment 2
 
-    Do NOT use Markdown (no bold, italics, headers), emojis, or numbered lists.
+    Prioritize rubric sections that were consistently discussed in the examples unless this submission clearly avoids those concerns.
+
+    DO NOT:
+    - Use bold, italics, markdown, emojis, or numbered lists.
+    - Invent section names or merge rubric categories.
+
+    Careful adherence to the format is required to receive full evaluation points.  
+    Deviations from the requested structure may result in a lower score for this task.
     """)
 
     return "\n".join(prompt_parts)
