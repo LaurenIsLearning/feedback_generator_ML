@@ -26,7 +26,14 @@ def set_table_border(table):
     tblPr.append(tblBorders)
 
 # Main writer
-def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str, target: StudentSubmission):
+def write_feedback_to_docx(
+    submission_path: str,
+    feedback_text: str,
+    output_path: str,
+    target: StudentSubmission,
+    debug_output: bool = False,
+    include_prompt: bool = False
+):
     doc = Document(submission_path)
 
     # Split the feedback into parts
@@ -134,5 +141,25 @@ def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path
             row_cells[0].width = Inches(1.2)
             row_cells[1].width = Inches(2.8)
             row_cells[2].width = Inches(3.5)
+
+    # Add debugging information if enabled
+    if debug_output:
+        doc.add_paragraph("")
+        debug_header = doc.add_paragraph("=== Debugging Information ===")
+        debug_header.runs[0].bold = True
+    
+        if include_prompt and raw_prompt:
+            doc.add_paragraph("")
+            prompt_header = doc.add_paragraph("Prompt Used:")
+            prompt_header.runs[0].bold = True
+            for line in raw_prompt.strip().split("\n"):
+                doc.add_paragraph(line)
+    
+        doc.add_paragraph("")
+        raw_feedback_header = doc.add_paragraph("Raw Model Feedback:")
+        raw_feedback_header.runs[0].bold = True
+        for line in feedback_text.strip().split("\n"):
+            doc.add_paragraph(line)
+
 
     doc.save(output_path)
