@@ -30,10 +30,7 @@ def write_feedback_to_docx(
     submission_path: str,
     feedback_text: str,
     output_path: str,
-    target: StudentSubmission,
-    raw_prompt=None,
-    debug_output: bool = False,
-    include_prompt: bool = False
+    target: StudentSubmission
 ):
     doc = Document(submission_path)
 
@@ -143,24 +140,14 @@ def write_feedback_to_docx(
             row_cells[1].width = Inches(2.8)
             row_cells[2].width = Inches(3.5)
 
-    # Add debugging information if enabled
-    if debug_output:
-        doc.add_paragraph("")
-        debug_header = doc.add_paragraph("=== Debugging Information ===")
-        debug_header.runs[0].bold = True
+    # Add raw model feedback at the end for reference
+    doc.add_paragraph("")
+    footer_header = doc.add_paragraph("Full Raw Generated Feedback:")
+    footer_header.runs[0].bold = True
+
+    for line in feedback_text.strip().split("\n"):
+        doc.add_paragraph(line)
     
-        if include_prompt and include_prompt:
-            doc.add_paragraph("")
-            prompt_header = doc.add_paragraph("Prompt Used:")
-            prompt_header.runs[0].bold = True
-            for line in raw_prompt.strip().split("\n"):
-                doc.add_paragraph(line)
-    
-        doc.add_paragraph("")
-        raw_feedback_header = doc.add_paragraph("Raw Model Feedback:")
-        raw_feedback_header.runs[0].bold = True
-        for line in feedback_text.strip().split("\n"):
-            doc.add_paragraph(line)
 
 
     doc.save(output_path)

@@ -82,9 +82,6 @@ def run_feedback_batch(
             feedback_text=feedback,
             output_path=output_path,
             target=target,
-            raw_prompt=prompt,  
-            debug_output=True,
-            include_prompt=True
         )
 
         # Optional output control
