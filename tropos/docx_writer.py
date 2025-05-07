@@ -26,18 +26,14 @@ def set_table_border(table):
     tblPr.append(tblBorders)
 
 # Main writer
-def write_feedback_to_docx(
-    submission_path: str,
-    feedback_text: str,
-    output_path: str,
-    target: StudentSubmission
-):
+def write_feedback_to_docx(submission_path: str, feedback_text: str, output_path: str, target: StudentSubmission):
     doc = Document(submission_path)
 
     # Split the feedback into parts
     inline_text = feedback_text
     summary_text = ""
     rubric_text = ""
+    raw_feedback = feedback_text
 
     if "--- RUBRIC FEEDBACK ---" in feedback_text:
         inline_summary_part, rubric_text = feedback_text.split("--- RUBRIC FEEDBACK ---", 1)
@@ -145,7 +141,7 @@ def write_feedback_to_docx(
     footer_header = doc.add_paragraph("Full Raw Generated Feedback:")
     footer_header.runs[0].bold = True
 
-    for line in feedback_text.strip().split("\n"):
+    for line in raw_feedback.strip().split("\n"):
         doc.add_paragraph(line)
     
 
