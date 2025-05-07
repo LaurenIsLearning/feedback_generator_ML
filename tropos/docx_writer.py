@@ -153,7 +153,7 @@ def write_feedback_to_docx(
             doc.add_paragraph("")
             prompt_header = doc.add_paragraph("Prompt Used:")
             prompt_header.runs[0].bold = True
-            for line in include_prompt.strip().split("\n"):
+            for line in raw_prompt.strip().split("\n"):
                 doc.add_paragraph(line)
     
         doc.add_paragraph("")
